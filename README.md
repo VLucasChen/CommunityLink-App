@@ -17,12 +17,5 @@ HUANG YICHEN agrees with the work breakdown agreement. 12 Oct 2025
 
 
 LE HOANG - 33603294: 
-- Task 1: Database schema design
-- Task 2: UI/UX improvements and Bootstrap integration
-- Task 3: Authentication plugin implementation and user management
-- Task 4: Public-facing pages and volunteer/partner registration
-- Task 5: Contact Us page with email notifications
-- Task 6: File upload handling and document management
 
-LE HOANG agrees with the work breakdown agreement. 12 Oct 2025
 
