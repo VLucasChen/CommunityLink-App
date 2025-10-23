@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use Authentication\Controller\Component\AuthenticationComponent;
+
 /**
  * Users Controller
  *
@@ -10,6 +12,11 @@ namespace App\Controller;
  */
 class UsersController extends AppController
 {
+    public function initialize(): void
+    {
+        parent::initialize();
+        $this->loadComponent('Authentication.Authentication');
+    }
     /**
      * Index method
      *
@@ -99,5 +106,45 @@ class UsersController extends AppController
         }
 
         return $this->redirect(['action' => 'index']);
+    }
+
+    /**
+     * Login method - A5 Authentication equivalent to A3 login
+     *
+     * @return \Cake\Http\Response|null|void Renders view
+     */
+    public function login()
+    {
+        $this->request->allowMethod(['get', 'post']);
+        $result = $this->Authentication->getResult();
+        
+        // If user is logged in, redirect to dashboard
+        if ($result->isValid()) {
+            $redirect = $this->request->getQuery('redirect', [
+                'controller' => 'Pages',
+                'action' => 'dashboard'
+            ]);
+            return $this->redirect($redirect);
+        }
+        
+        // Display error if user submitted and authentication failed
+        if ($this->request->is('post') && !$result->isValid()) {
+            $this->Flash->error(__('Invalid username or password'));
+        }
+    }
+
+    /**
+     * Logout method - A5 Authentication equivalent to A3 logout
+     *
+     * @return \Cake\Http\Response|null|void Renders view
+     */
+    public function logout()
+    {
+        $result = $this->Authentication->getResult();
+        if ($result->isValid()) {
+            $this->Authentication->logout();
+            $this->Flash->success(__('You have been logged out.'));
+        }
+        return $this->redirect(['controller' => 'Users', 'action' => 'login']);
     }
 }
