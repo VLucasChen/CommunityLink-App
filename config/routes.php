@@ -61,6 +61,9 @@ return function (RouteBuilder $routes): void {
          * ...and connect the rest of 'Pages' controller's URLs.
          */
         $builder->connect('/pages/*', 'Pages::display');
+        
+        // A5 Dashboard route - A3 equivalent to dashboard.php
+        $builder->connect('/dashboard', ['controller' => 'Pages', 'action' => 'dashboard']);
 
         /*
          * Connect catchall routes for all controllers.
