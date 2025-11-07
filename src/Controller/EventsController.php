@@ -3,75 +3,61 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use Cake\Datasource\Exception\RecordNotFoundException;
+use Cake\Http\Exception\NotFoundException;
 
 class EventsController extends AppController
 {
     public function initialize(): void
     {
         parent::initialize();
-        // Paginator không cần loadComponent trong CakePHP 5
+      
         $this->loadComponent('Flash');
+        
     }
 
     /**
-     * Index method — hiển thị danh sách sự kiện (có search & auto-archive)
+     * Index
      */
     public function index()
-{
-    $today = new \DateTime('today');
-    $keyword = $this->request->getQuery('keyword');
+    {
+        $keyword = $this->request->getQuery('keyword');
 
-    $query = $this->Events->find('all', [
-        'contain' => ['Organisations'],
-        'order' => ['event_date' => 'ASC']
+        $query = $this->Events->find('all', [
+            'contain' => ['Organisations'],
+            'order' => ['event_date' => 'ASC']
+        ]);
 
+        if (!empty($keyword)) {
+            $query->where([
+                'OR' => [
+                    'Events.title LIKE' => "%$keyword%",
+                    'Events.location LIKE' => "%$keyword%",
+                    'Organisations.org_name LIKE' => "%$keyword%"
+                ]
+            ]);
+        }
+
+        $events = $this->paginate($query, [
+        'limit' => 10
     ]);
 
-    if (!empty($keyword)) {
-        $query->where([
-            'OR' => [
-                'Events.name LIKE' => "%$keyword%",
-                'Organisations.name LIKE' => "%$keyword%"
-            ]
-        ]);
+        $this->set(compact('events', 'keyword'));
     }
-
-    // ✅ Phân trang trước
-    $events = $this->paginate($query);
-
-    // ✅ Sau đó gắn trạng thái Archived/Active
-    foreach ($events as $event) {
-        $event->status = ($event->end_date < $today) ? 'Archived' : 'Active';
-    }
-
-    $this->set(compact('events', 'keyword'));
-}
-
-
 
     /**
-     * View method
+     * View 
      */
     public function view($id = null)
     {
-        try {
-            $event = $this->Events->get($id, [
-                'contain' => ['Organisations', 'VolunteerEvents' => ['Volunteers']],
-            ]);
-        } catch (RecordNotFoundException $e) {
-            $this->Flash->error(__('Event not found.'));
-            return $this->redirect(['action' => 'index']);
-        }
-
-        $today = new \DateTime('today');
-        $event->status = ($event->end_date < $today) ? 'Archived' : 'Active';
+        $event = $this->Events->get($id, [
+            'contain' => ['Organisations', 'VolunteerEvents' => ['Volunteers']]
+        ]);
 
         $this->set(compact('event'));
     }
 
     /**
-     * Add method
+     * Add 
      */
     public function add()
     {
@@ -79,55 +65,56 @@ class EventsController extends AppController
         if ($this->request->is('post')) {
             $event = $this->Events->patchEntity($event, $this->request->getData());
             if ($this->Events->save($event)) {
-                $this->Flash->success(__('The event has been saved.'));
+                $this->Flash->success(__('The event has been created successfully.'));
                 return $this->redirect(['action' => 'index']);
             }
-            $this->Flash->error(__('The event could not be saved. Please, try again.'));
+            $this->Flash->error(__('Unable to save the event. Please try again.'));
         }
-        $organisations = $this->Events->Organisations->find('list')->all();
+
+        $organisations = $this->Events->Organisations->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'org_name',
+            'limit' => 200
+        ])->all();
+
         $this->set(compact('event', 'organisations'));
     }
 
     /**
-     * Edit method
+     * Edit 
      */
     public function edit($id = null)
     {
-        try {
-            $event = $this->Events->get($id);
-        } catch (RecordNotFoundException $e) {
-            $this->Flash->error(__('Event not found.'));
-            return $this->redirect(['action' => 'index']);
-        }
-
+        $event = $this->Events->get($id);
         if ($this->request->is(['patch', 'post', 'put'])) {
             $event = $this->Events->patchEntity($event, $this->request->getData());
             if ($this->Events->save($event)) {
-                $this->Flash->success(__('The event has been updated.'));
+                $this->Flash->success(__('The event has been updated successfully.'));
                 return $this->redirect(['action' => 'index']);
             }
-            $this->Flash->error(__('Unable to update the event. Please, try again.'));
+            $this->Flash->error(__('Unable to update the event. Please try again.'));
         }
 
-        $organisations = $this->Events->Organisations->find('list')->all();
+        $organisations = $this->Events->Organisations->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'org_name',
+            'limit' => 200
+        ])->all();
+
         $this->set(compact('event', 'organisations'));
     }
 
     /**
-     * Delete method
+     * Delete 
      */
     public function delete($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
-        try {
-            $event = $this->Events->get($id);
-            if ($this->Events->delete($event)) {
-                $this->Flash->success(__('The event has been deleted.'));
-            } else {
-                $this->Flash->error(__('The event could not be deleted. Please, try again.'));
-            }
-        } catch (RecordNotFoundException $e) {
-            $this->Flash->error(__('Event not found.'));
+        $event = $this->Events->get($id);
+        if ($this->Events->delete($event)) {
+            $this->Flash->success(__('The event has been deleted.'));
+        } else {
+            $this->Flash->error(__('The event could not be deleted. Please try again.'));
         }
 
         return $this->redirect(['action' => 'index']);

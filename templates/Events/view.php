@@ -1,16 +1,24 @@
 <div class="events view content">
-    <h3><?= h($event->name) ?></h3>
-    <table class="table table-bordered table-striped">
-        <tr><th><?= __('ID') ?></th><td><?= h($event->id) ?></td></tr>
-        <tr><th><?= __('Organisation') ?></th><td><?= h($event->organisation->name ?? '-') ?></td></tr>
-        <tr><th><?= __('Start Date') ?></th><td><?= h($event->start_date) ?></td></tr>
-        <tr><th><?= __('End Date') ?></th><td><?= h($event->end_date) ?></td></tr>
-        <tr><th><?= __('Status') ?></th><td><?= h($event->status ?? 'Active') ?></td></tr>
-        <tr><th><?= __('Description') ?></th><td><?= nl2br(h($event->description)) ?></td></tr>
+    <h2><?= h($event->title) ?></h2>
+    <table class="table table-bordered">
+        <tr><th>Location</th><td><?= h($event->location) ?></td></tr>
+        <tr><th>Date</th><td><?= h($event->event_date) ?></td></tr>
+        <tr><th>Host</th><td><?= h($event->host) ?></td></tr>
+        <tr><th>Organisation</th><td><?= h($event->organisation->org_name ?? '-') ?></td></tr>
+        <tr><th>Status</th><td><?= h($event->status) ?></td></tr>
+        <tr><th>Description</th><td><?= h($event->event_description) ?></td></tr>
+        <tr><th>Required Equipment</th><td><?= h($event->required_equipment) ?></td></tr>
+        <tr><th>Required Skills</th><td><?= h($event->required_skills) ?></td></tr>
+        <tr><th>Number of Required Crews</th><td><?= h($event->number_of_required_crews) ?></td></tr>
+        <tr><th>Contact Person</th><td><?= h($event->contact_person_full_name) ?> (<?= h($event->contact_person_email) ?>)</td></tr>
     </table>
 
-    <div class="mt-3">
-        <?= $this->Html->link(__('Edit Event'), ['action' => 'edit', $event->id], ['class' => 'btn btn-warning']) ?>
-        <?= $this->Html->link(__('Back to List'), ['action' => 'index'], ['class' => 'btn btn-secondary']) ?>
+    <div class="d-flex gap-2">
+        <?= $this->Html->link('Edit', ['action' => 'edit', $event->id], ['class' => 'btn btn-warning']) ?>
+        <?= $this->Form->postLink('Delete', ['action' => 'delete', $event->id], [
+            'confirm' => __('Are you sure you want to delete "{0}"?', $event->title),
+            'class' => 'btn btn-danger'
+        ]) ?>
+        <?= $this->Html->link('Back to List', ['action' => 'index'], ['class' => 'btn btn-secondary']) ?>
     </div>
 </div>
