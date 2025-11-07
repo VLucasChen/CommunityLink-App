@@ -3,101 +3,70 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-/**
- * VolunteerEvents Controller
- *
- * @property \App\Model\Table\VolunteerEventsTable $VolunteerEvents
- */
+use Cake\Http\Response;
+use Cake\Utility\Text;
 class VolunteerEventsController extends AppController
 {
-    /**
-     * Index method
-     *
-     * @return \Cake\Http\Response|null|void Renders view
-     */
+    
+
     public function index()
     {
         $query = $this->VolunteerEvents->find()
-            ->contain(['Events', 'Volunteers']);
+            ->contain(['Events', 'Volunteers'])
+            ->order(['VolunteerEvents.created' => 'DESC']);
+
+        $this->paginate = ['limit' => 15];
         $volunteerEvents = $this->paginate($query);
 
-        $this->set(compact('volunteerEvents'));
-    }
-
-    /**
-     * View method
-     *
-     * @param string|null $id Volunteer Event id.
-     * @return \Cake\Http\Response|null|void Renders view
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
-    public function view($id = null)
-    {
-        $volunteerEvent = $this->VolunteerEvents->get($id, contain: ['Events', 'Volunteers']);
-        $this->set(compact('volunteerEvent'));
-    }
-
-    /**
-     * Add method
-     *
-     * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
-     */
-    public function add()
-    {
+        // Tạo entity mới + UUID
         $volunteerEvent = $this->VolunteerEvents->newEmptyEntity();
-        if ($this->request->is('post')) {
-            $volunteerEvent = $this->VolunteerEvents->patchEntity($volunteerEvent, $this->request->getData());
-            if ($this->VolunteerEvents->save($volunteerEvent)) {
-                $this->Flash->success(__('The volunteer event has been saved.'));
+        $volunteerEvent->id = Text::uuid(); // TỰ SINH UUID
 
+        if ($this->request->is(['post', 'put'])) {
+            $data = $this->request->getData();
+            $id = $data['id'] ?? null;
+
+            if ($id) {
+                $volunteerEvent = $this->VolunteerEvents->get($id);
+            } else {
+                // Nếu là thêm mới → tạo entity mới + UUID
+                $volunteerEvent = $this->VolunteerEvents->newEmptyEntity();
+                $volunteerEvent->id = Text::uuid();
+            }
+
+            $volunteerEvent = $this->VolunteerEvents->patchEntity($volunteerEvent, $data, [
+                'accessibleFields' => ['id' => true] // Cho phép patch id
+            ]);
+
+            if ($this->VolunteerEvents->save($volunteerEvent)) {
+                $this->Flash->success('Assignment saved.');
                 return $this->redirect(['action' => 'index']);
             }
-            $this->Flash->error(__('The volunteer event could not be saved. Please, try again.'));
+            $this->Flash->error('Please fix errors.');
         }
-        $events = $this->VolunteerEvents->Events->find('list', limit: 200)->all();
-        $volunteers = $this->VolunteerEvents->Volunteers->find('list', limit: 200)->all();
-        $this->set(compact('volunteerEvent', 'events', 'volunteers'));
+
+        $events = $this->VolunteerEvents->Events->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'title'
+        ])->toArray();
+
+        $volunteers = $this->VolunteerEvents->Volunteers->find('list', [
+            'keyField' => 'id',
+            'valueField' => fn($v) => $v->first_name . ' ' . $v->last_name
+        ])->toArray();
+
+        $this->set(compact('volunteerEvents', 'volunteerEvent', 'events', 'volunteers'));
     }
 
-    /**
-     * Edit method
-     *
-     * @param string|null $id Volunteer Event id.
-     * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
-    public function edit($id = null)
-    {
-        $volunteerEvent = $this->VolunteerEvents->get($id, contain: []);
-        if ($this->request->is(['patch', 'post', 'put'])) {
-            $volunteerEvent = $this->VolunteerEvents->patchEntity($volunteerEvent, $this->request->getData());
-            if ($this->VolunteerEvents->save($volunteerEvent)) {
-                $this->Flash->success(__('The volunteer event has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
-            }
-            $this->Flash->error(__('The volunteer event could not be saved. Please, try again.'));
-        }
-        $events = $this->VolunteerEvents->Events->find('list', limit: 200)->all();
-        $volunteers = $this->VolunteerEvents->Volunteers->find('list', limit: 200)->all();
-        $this->set(compact('volunteerEvent', 'events', 'volunteers'));
-    }
-
-    /**
-     * Delete method
-     *
-     * @param string|null $id Volunteer Event id.
-     * @return \Cake\Http\Response|null Redirects to index.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
-    public function delete($id = null)
+    public function delete($id = null): ?Response
     {
         $this->request->allowMethod(['post', 'delete']);
-        $volunteerEvent = $this->VolunteerEvents->get($id);
-        if ($this->VolunteerEvents->delete($volunteerEvent)) {
-            $this->Flash->success(__('The volunteer event has been deleted.'));
+        $ve = $this->VolunteerEvents->get($id);
+
+        if ($this->VolunteerEvents->delete($ve)) {
+            $this->Flash->success('Assignment deleted.');
         } else {
-            $this->Flash->error(__('The volunteer event could not be deleted. Please, try again.'));
+            $this->Flash->error('Cannot delete.');
         }
 
         return $this->redirect(['action' => 'index']);

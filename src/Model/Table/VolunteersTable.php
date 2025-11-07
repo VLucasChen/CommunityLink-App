@@ -39,7 +39,7 @@ class VolunteersTable extends Table
 
         $this->setTable('volunteers');
         $this->setDisplayField('full_name');
-        $this->setPrimaryKey('volunteer_id');
+        $this->setPrimaryKey('id');
     }
 
     /**

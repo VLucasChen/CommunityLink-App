@@ -55,6 +55,8 @@ class VolunteerEventsTable extends Table
         $this->belongsTo('Volunteers', [
             'foreignKey' => 'volunteer_id',
             'joinType' => 'INNER',
+            'className' => 'Volunteers',
+            'bindingKey' => 'id'
         ]);
     }
 

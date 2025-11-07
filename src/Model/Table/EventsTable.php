@@ -46,6 +46,9 @@ class EventsTable extends Table
         $this->belongsTo('Organisations', [
             'foreignKey' => 'organisation_id',
         ]);
+        $this->hasMany('VolunteerEvents', [
+            'foreignKey' => 'event_id'
+        ]);
     }
 
     /**

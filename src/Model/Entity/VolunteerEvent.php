@@ -29,6 +29,7 @@ class VolunteerEvent extends Entity
      * @var array<string, bool>
      */
     protected array $_accessible = [
+        'id' => true,
         'event_id' => true,
         'volunteer_id' => true,
         'created' => true,
