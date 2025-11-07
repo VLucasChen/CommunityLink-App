@@ -23,7 +23,6 @@ $cakeDescription = 'Event Manager';
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 
-    <!-- Tùy chỉnh CSS (nếu cần) -->
     <?= $this->fetch('meta') ?>
     <?= $this->fetch('css') ?>
 </head>
