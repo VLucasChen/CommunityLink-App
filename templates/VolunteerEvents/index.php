@@ -126,7 +126,7 @@ $modalId = 'veModal';
     </div>
 </div>
 
-<!-- ẨN FORM -->
+
 <div style="display: none;" id="hiddenVEFields">
     <?= $this->Form->control('event_id', [
         'label' => 'Event',
