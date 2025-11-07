@@ -37,5 +37,6 @@ class Event extends Entity
         'organisation_id' => true,
         'created_at' => true,
         'organisation' => true,
+        'organisation_id' => true, 
     ];
 }

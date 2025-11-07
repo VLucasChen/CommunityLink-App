@@ -1,23 +1,13 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- *
- * Licensed under The MIT License
- * For full copyright and license information, please see the LICENSE.txt
- * Redistributions of files must retain the above copyright notice.
- *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
- * @since         0.10.0
- * @license       https://opensource.org/licenses/mit-license.php MIT License
+ * CakePHP(tm) : Rapid Development Framework[](https://cakephp.org)
  * @var \App\View\AppView $this
  */
 
-$cakeDescription = 'CakePHP: the rapid development php framework';
+$cakeDescription = 'Event Manager';
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <?= $this->Html->charset() ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -27,29 +17,55 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
     </title>
     <?= $this->Html->meta('icon') ?>
 
-    <?= $this->Html->css(['normalize.min', 'milligram.min', 'fonts', 'cake']) ?>
+    <!-- Bootstrap 5 CSS -->
+    <?= $this->Html->css('https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css') ?>
 
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Tùy chỉnh CSS (nếu cần) -->
     <?= $this->fetch('meta') ?>
     <?= $this->fetch('css') ?>
-    <?= $this->fetch('script') ?>
 </head>
-<body>
-    <nav class="top-nav">
-        <div class="top-nav-title">
-            <a href="<?= $this->Url->build('/') ?>"><span>Cake</span>PHP</a>
-        </div>
-        <div class="top-nav-links">
-            <a target="_blank" rel="noopener" href="https://book.cakephp.org/5/">Documentation</a>
-            <a target="_blank" rel="noopener" href="https://api.cakephp.org/">API</a>
+<body class="bg-light">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="<?= $this->Url->build('/') ?>">
+                Event Manager
+            </a>
+            <div class="d-flex">
+                <a href="<?= $this->Url->build(['controller' => 'Events', 'action' => 'index']) ?>"
+                   class="btn btn-outline-light btn-sm">
+                    Events
+                </a>
+            </div>
         </div>
     </nav>
-    <main class="main">
+
+    <!-- Main Content -->
+    <main class="py-4">
         <div class="container">
             <?= $this->Flash->render() ?>
             <?= $this->fetch('content') ?>
         </div>
     </main>
-    <footer>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white-50 py-4 mt-5">
+        <div class="container text-center">
+            <small>
+                &copy; <?= date('Y') ?> Event Manager. Powered by
+                <a href="https://cakephp.org" target="_blank" class="text-white">CakePHP</a>
+            </small>
+        </div>
     </footer>
+
+    <!-- Bootstrap 5 JS (Bundle includes Popper) -->
+    <?= $this->Html->script('https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js') ?>
+
+    <!-- Custom JS -->
+    <?= $this->fetch('script') ?>
 </body>
 </html>

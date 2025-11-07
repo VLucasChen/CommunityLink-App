@@ -1,64 +1,84 @@
-<div class="events index content">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2><?= __('Events') ?></h2>
-        <?= $this->Html->link(__('Add Event'), ['action' => 'add'], ['class' => 'btn btn-primary']) ?>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary"><i class="bi bi-calendar-event"></i> Events Management</h2>
+        <?= $this->Html->link('➕ Add Event', ['action' => 'add'], ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?= $this->Form->create(null, ['type' => 'get', 'class' => 'mb-3 d-flex']) ?>
-        <?= $this->Form->control('keyword', [
-            'label' => false,
-            'value' => $keyword,
-            'placeholder' => 'Search by title, location, or organisation...',
-            'class' => 'form-control me-2'
-        ]) ?>
-        <?= $this->Form->button(__('Search'), ['class' => 'btn btn-success']) ?>
-        <a href="<?= $this->Url->build(['action' => 'index']) ?>" class="btn btn-secondary ms-2">Clear</a>
-    <?= $this->Form->end() ?>
-
-    <div class="table-responsive">
-        <table class="table table-striped align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th><?= $this->Paginator->sort('title') ?></th>
-                    <th><?= $this->Paginator->sort('location') ?></th>
-                    <th><?= $this->Paginator->sort('event_date') ?></th>
-                    <th><?= __('Organisation') ?></th>
-                    <th><?= $this->Paginator->sort('status') ?></th>
-                    <th class="text-center"><?= __('Actions') ?></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($events as $event): ?>
-                <tr>
-                    <td><?= h($event->title) ?></td>
-                    <td><?= h($event->location) ?></td>
-                    <td><?= h($event->event_date) ?></td>
-                    <td><?= h($event->organisation->org_name ?? '-') ?></td>
-                    <td><?= h($event->status) ?></td>
-                    <td class="text-center">
-                        <?= $this->Html->link('View', ['action' => 'view', $event->id], ['class' => 'btn btn-sm btn-outline-info']) ?>
-                        <?= $this->Html->link('Edit', ['action' => 'edit', $event->id], ['class' => 'btn btn-sm btn-outline-warning']) ?>
-                        <?= $this->Form->postLink('Delete', ['action' => 'delete', $event->id], [
-                            'confirm' => __('Are you sure you want to delete "{0}"?', $event->title),
-                            'class' => 'btn btn-sm btn-outline-danger'
-                        ]) ?>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+    <!-- Search -->
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body">
+            <?= $this->Form->create(null, ['type' => 'get', 'class' => 'row g-2 align-items-center']) ?>
+            <div class="col-md-10">
+                <?= $this->Form->control('keyword', [
+                    'label' => false,
+                    'value' => $keyword,
+                    'placeholder' => 'Search by title, location, or organisation...',
+                    'class' => 'form-control'
+                ]) ?>
+            </div>
+            <div class="col-md-2">
+                <?= $this->Form->button('Search', ['class' => 'btn btn-primary w-100']) ?>
+            </div>
+            <?= $this->Form->end() ?>
+        </div>
     </div>
 
-    <div class="paginator mt-3">
-        <ul class="pagination justify-content-center">
-            <?= $this->Paginator->first('<<') ?>
-            <?= $this->Paginator->prev('<') ?>
+    <!-- Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th><?= $this->Paginator->sort('title', 'Title') ?></th>
+                        <th><?= $this->Paginator->sort('location', 'Location') ?></th>
+                        <th><?= $this->Paginator->sort('event_date', 'Date') ?></th>
+                        <th>Organisation</th>
+                        <th><?= $this->Paginator->sort('status', 'Status') ?></th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($events as $event): ?>
+                        <tr>
+                            <td><?= h($event->title) ?></td>
+                            <td><?= h($event->location) ?></td>
+                            <td><?= h($event->event_date) ?></td>
+                            <td><?= $event->organisation ? h($event->organisation->org_name) : '—' ?></td>
+                            <td>
+                                <?php
+                                    $badge = match ($event->status) {
+                                        'Preparing' => 'warning',
+                                        'Ready to go' => 'success',
+                                        'Archive' => 'secondary',
+                                        'Failed' => 'danger',
+                                        default => 'light'
+                                    };
+                                ?>
+                                <span class="badge bg-<?= $badge ?>"><?= h($event->status) ?></span>
+                            </td>
+                            <td class="text-center">
+                                <?= $this->Html->link('View', ['action' => 'view', $event->id], ['class' => 'btn btn-sm btn-outline-primary me-1']) ?>
+                                <?= $this->Html->link('Edit', ['action' => 'edit', $event->id], ['class' => 'btn btn-sm btn-outline-warning me-1']) ?>
+                                <?= $this->Form->postLink('Delete', ['action' => 'delete', $event->id], [
+                                    'confirm' => 'Are you sure?',
+                                    'class' => 'btn btn-sm btn-outline-danger'
+                                ]) ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-3 d-flex justify-content-between align-items-center">
+        <div><?= $this->Paginator->counter(__('Page {{page}} of {{pages}}, showing {{current}} events out of {{count}}')) ?></div>
+        <ul class="pagination mb-0">
+            <?= $this->Paginator->first('<< First') ?>
+            <?= $this->Paginator->prev('< Prev') ?>
             <?= $this->Paginator->numbers() ?>
-            <?= $this->Paginator->next('>') ?>
-            <?= $this->Paginator->last('>>') ?>
+            <?= $this->Paginator->next('Next >') ?>
+            <?= $this->Paginator->last('Last >>') ?>
         </ul>
-        <p class="text-center text-muted">
-            <?= $this->Paginator->counter('{{current}} of {{count}} total') ?>
-        </p>
     </div>
 </div>

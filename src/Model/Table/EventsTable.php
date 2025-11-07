@@ -41,7 +41,7 @@ class EventsTable extends Table
 
         $this->setTable('events');
         $this->setDisplayField('title');
-        $this->setPrimaryKey('event_id');
+        $this->setPrimaryKey('id');
 
         $this->belongsTo('Organisations', [
             'foreignKey' => 'organisation_id',
@@ -69,17 +69,17 @@ class EventsTable extends Table
             ->notEmptyString('location');
 
         $validator
-            ->scalar('description')
-            ->requirePresence('description', 'create')
-            ->notEmptyString('description');
+            ->scalar('event_description')
+            ->requirePresence('event_description', 'create')
+            ->notEmptyString('event_description');
 
         $validator
-            ->date('date')
-            ->requirePresence('date', 'create')
-            ->notEmptyDate('date');
+            ->date('event_date')
+            ->requirePresence('event_date', 'create')
+            ->notEmptyDate('event_date');
 
         $validator
-            ->integer('organisation_id')
+            ->uuid('organisation_id')
             ->allowEmptyString('organisation_id');
 
         $validator
