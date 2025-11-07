@@ -16,6 +16,7 @@ class UsersController extends AppController
     {
         parent::initialize();
         $this->loadComponent('Authentication.Authentication');
+        $this->Authentication->allowUnauthenticated(['login', 'logout']);
     }
     /**
      * Index method
@@ -117,21 +118,18 @@ class UsersController extends AppController
     {
         $this->request->allowMethod(['get', 'post']);
         $result = $this->Authentication->getResult();
-        
-        // If user is logged in, redirect to dashboard
+
         if ($result->isValid()) {
-            $redirect = $this->request->getQuery('redirect', [
-                'controller' => 'Pages',
-                'action' => 'dashboard'
-            ]);
-            return $this->redirect($redirect);
+            // Lấy redirect từ Authentication, không dùng request->getQuery()
+            $target = $this->Authentication->getLoginRedirect() ?? ['controller' => 'Pages', 'action' => 'dashboard'];
+            return $this->redirect($target);
         }
-        
-        // Display error if user submitted and authentication failed
+
         if ($this->request->is('post') && !$result->isValid()) {
             $this->Flash->error(__('Invalid username or password'));
         }
     }
+
 
     /**
      * Logout method - A5 Authentication equivalent to A3 logout

@@ -16,7 +16,12 @@ HUANG YICHEN - 35860537:
 HUANG YICHEN agrees with the work breakdown agreement. 12 Oct 2025
 
 LE HOANG - 33603294: 
-
+- Task 1: Database schema design
+- Task 2: Public-facing pages and volunteer/partner registration
+- Task 3: Contact Us page with email notifications
+- Task 4: Search and filter functionality across all entities
+- Task 5: File upload handling and document management
+- Task 6: UI/UX improvements and Bootstrap integration
 ---
 
 # CakePHP Application Skeleton
