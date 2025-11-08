@@ -20,7 +20,7 @@ class Organisation extends Entity
         'events' => true,
     ];
 
-    protected $_virtual = ['display_name'];
+    protected array $_virtual = ['display_name'];
 
     protected function _getDisplayName(): string
     {

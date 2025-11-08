@@ -27,7 +27,7 @@ class Event extends Entity
         'volunteers' => true,
     ];
 
-    protected $_virtual = ['event_summary'];
+    protected array $_virtual = ['event_summary'];
 
     protected function _getEventSummary(): string
     {

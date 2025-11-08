@@ -19,16 +19,31 @@ class PublicController extends AppController
     {
         parent::initialize();
         $this->viewBuilder()->setLayout('public');
+        
+        // Load tables manually since PublicController doesn't have a corresponding table
+        $this->Events = $this->fetchTable('Events');
+        $this->Organisations = $this->fetchTable('Organisations');
+        $this->VolunteerSignups = $this->fetchTable('VolunteerSignups');
+        $this->ContactMessages = $this->fetchTable('ContactMessages');
+        
+        // Allow all public actions to be accessed without authentication
+        $this->Authentication->allowUnauthenticated([
+            'home',
+            'volunteerRegister',
+            'organisationRegister',
+            'contact',
+            'publicEvents'
+        ]);
     }
 
     // 🏠 Trang chủ
     public function home()
     {
-        $events = $this->Events->find('all', [
-            'contain' => ['Organisations'],
-            'order' => ['event_date' => 'ASC'],
-            'limit' => 3
-        ]);
+        $events = $this->Events->find()
+            ->contain(['Organisations'])
+            ->order(['event_date' => 'ASC'])
+            ->limit(3)
+            ->all();
         $this->set(compact('events'));
     }
 
@@ -102,10 +117,10 @@ class PublicController extends AppController
     // 📅 Danh sách sự kiện công khai
     public function publicEvents()
     {
-        $events = $this->Events->find('all', [
-            'contain' => ['Organisations'],
-            'order' => ['event_date' => 'ASC']
-        ]);
+        $events = $this->Events->find()
+            ->contain(['Organisations'])
+            ->order(['event_date' => 'ASC'])
+            ->all();
         $this->set(compact('events'));
     }
 }

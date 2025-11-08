@@ -22,7 +22,7 @@ class VolunteerSignup extends Entity
         'modified' => true,
     ];
 
-    protected $_virtual = ['full_name'];
+    protected array $_virtual = ['full_name'];
 
     protected function _getFullName(): string
     {

@@ -39,23 +39,32 @@ return [
      */
     'Datasources' => [
         'default' => [
-            'host' => 'localhost',
+            /*
+             * Use 127.0.0.1 instead of localhost to force TCP connection
+             * This avoids socket file issues on macOS
+             * For MAMP users, you may need to use '127.0.0.1' with port 8889
+             */
+            'host' => env('DB_HOST', '127.0.0.1'),
             /*
              * CakePHP will use the default DB port based on the driver selected
-             * MySQL on MAMP uses port 8889, MAMP users will want to uncomment
-             * the following line and set the port accordingly
+             * MySQL on MAMP uses port 8889, MAMP users will want to change this
+             * XAMPP/Homebrew uses default port 3306
              */
-            //'port' => 'non_standard_port_number',
+            'port' => env('DB_PORT', '3306'),
 
-            'username' => 'root',
-            'password' => '',
+            'username' => env('DB_USERNAME', 'root'),
+            'password' => env('DB_PASSWORD', ''),
 
-            'database' => 'A5',
+            'database' => env('DB_DATABASE', 'A5'),
+            
             /*
-             * If not using the default 'public' schema with the PostgreSQL driver
-             * set it here.
+             * For macOS users experiencing socket issues, you can uncomment
+             * and set the socket path. Common paths:
+             * - MAMP: /Applications/MAMP/tmp/mysql/mysql.sock
+             * - Homebrew: /tmp/mysql.sock or /var/mysql/mysql.sock
+             * - XAMPP: /Applications/XAMPP/xamppfiles/var/mysql/mysql.sock
              */
-            //'schema' => 'myapp',
+            //'unix_socket' => env('DB_SOCKET', '/tmp/mysql.sock'),
 
             /*
              * You can use a DSN string to set the entire configuration
