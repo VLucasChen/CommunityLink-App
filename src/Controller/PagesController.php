@@ -43,6 +43,19 @@ class PagesController extends AppController
      *   be found and not in debug mode.
      * @throws \Cake\View\Exception\MissingTemplateException In debug mode.
      */
+    /**
+     * Dashboard action for authenticated users
+     *
+     * @return \Cake\Http\Response|null
+     */
+    public function dashboard(): ?Response
+    {
+        // Get current user
+        $user = $this->Authentication->getIdentity();
+        $this->set(compact('user'));
+        return null;
+    }
+
     public function display(string ...$path): ?Response
     {
         if (!$path) {

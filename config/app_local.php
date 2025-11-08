@@ -1,5 +1,7 @@
 <?php
 
+use Cake\Database\Connection;
+use Cake\Database\Driver\Mysql;
 use function Cake\Core\env;
 
 /*
@@ -39,13 +41,17 @@ return [
      */
     'Datasources' => [
         'default' => [
-            'host' => 'localhost',
+            'className' => Connection::class,
+            'driver' => Mysql::class,
+            // Use 127.0.0.1 instead of localhost on macOS to force TCP connection
+            // If using MAMP, change to '127.0.0.1' and uncomment port => 8889
+            'host' => '127.0.0.1',
             /*
              * CakePHP will use the default DB port based on the driver selected
              * MySQL on MAMP uses port 8889, MAMP users will want to uncomment
              * the following line and set the port accordingly
              */
-            //'port' => 'non_standard_port_number',
+            //'port' => 8889,  // Uncomment this if using MAMP
 
             'username' => 'root',
             'password' => '',
@@ -67,13 +73,15 @@ return [
          * The test connection is used during the test suite.
          */
         'test' => [
-            'host' => 'localhost',
-            //'port' => 'non_standard_port_number',
+            'className' => Connection::class,
+            'driver' => Mysql::class,
+            'host' => '127.0.0.1',
+            //'port' => 8889,  // Uncomment this if using MAMP
             'username' => 'root',
             'password' => '',
             'database' => 'A5_test',
             //'schema' => 'myapp',
-            'url' => env('DATABASE_TEST_URL', 'sqlite://127.0.0.1/tmp/tests.sqlite'),
+            'url' => env('DATABASE_TEST_URL', null),
         ],
     ],
 
