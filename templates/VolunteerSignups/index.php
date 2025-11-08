@@ -87,6 +87,125 @@
         align-items: center;
     }
 
+    .filters-section {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .filter-group:has(input[name="date_from"]) {
+        min-width: 280px;
+    }
+
+    .filter-group-button {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        flex: 0;
+        min-height: 100%;
+    }
+
+    .filter-group-button::before {
+        content: '';
+        height: 1.5rem;
+        display: block;
+    }
+
+    .filter-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--m3-on-surface);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-label i {
+        color: var(--m3-primary);
+    }
+
+    .filter-select,
+    .filter-input {
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--m3-surface-variant);
+        border-radius: 12px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: white;
+        height: 48px;
+        box-sizing: border-box;
+    }
+
+    .filter-select:focus,
+    .filter-input:focus {
+        outline: none;
+        border-color: var(--m3-primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .btn-filter {
+        background: linear-gradient(135deg, var(--m3-primary) 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.25rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        white-space: nowrap;
+        height: 48px;
+        box-sizing: border-box;
+    }
+
+    .btn-filter:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .btn-clear-filters {
+        background: white;
+        color: var(--m3-on-surface);
+        border: 2px solid var(--m3-surface-variant);
+        padding: 0.75rem 1.25rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+        height: 48px;
+        box-sizing: border-box;
+    }
+
+    .btn-clear-filters:hover {
+        background: var(--m3-surface-variant);
+        color: var(--m3-on-surface);
+        border-color: var(--m3-outline);
+    }
+
     .btn-add {
         background: linear-gradient(135deg, var(--m3-primary) 0%, #764ba2 100%);
         color: white;
@@ -270,7 +389,7 @@
     }
 
     .empty-state i {
-        font-size: 4rem;
+        font-size: 3rem;
         color: var(--m3-outline);
         opacity: 0.5;
         margin-bottom: 1rem;
@@ -279,11 +398,20 @@
     .empty-state h3 {
         color: var(--m3-on-surface);
         margin-bottom: 0.5rem;
+        font-size: 1.5rem;
     }
 
     .empty-state p {
         color: var(--m3-outline);
         margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+    }
+
+    .empty-state .btn-add {
+        padding: 0.5rem 0.875rem;
+        font-size: 0.8rem;
+        box-shadow: 0 2px 6px rgba(102, 126, 234, 0.2);
+        height: auto;
     }
 
     .pagination-wrapper {
@@ -395,9 +523,9 @@
             <?= $this->Form->end() ?>
         </div>
         <div class="search-actions">
-            <?php if (!empty($search)): ?>
+            <?php if (!empty($search) || !empty($statusFilter) || !empty($dateFrom) || !empty($dateTo)): ?>
                 <?= $this->Html->link(
-                    '<i class="bi bi-x-circle"></i> Clear',
+                    '<i class="bi bi-x-circle"></i> Clear All',
                     ['action' => 'index'],
                     ['class' => 'btn-add', 'escape' => false, 'style' => 'background: #6B7280;']
                 ) ?>
@@ -410,22 +538,99 @@
         </div>
     </div>
 
+    <!-- Filters Section -->
+    <div class="filters-section">
+        <?= $this->Form->create(null, [
+            'type' => 'get',
+            'url' => ['action' => 'index'],
+            'class' => 'filters-form',
+            'style' => 'display: contents;'
+        ]) ?>
+        
+        <?php if (!empty($search)): ?>
+            <?= $this->Form->hidden('search', ['value' => $search]) ?>
+        <?php endif; ?>
+        <?php if (!empty($dateFrom)): ?>
+            <?= $this->Form->hidden('date_from', ['value' => $dateFrom]) ?>
+        <?php endif; ?>
+        <?php if (!empty($dateTo)): ?>
+            <?= $this->Form->hidden('date_to', ['value' => $dateTo]) ?>
+        <?php endif; ?>
+        
+        <div class="filter-group">
+            <label class="filter-label">
+                <i class="bi bi-funnel"></i>
+                Status
+            </label>
+            <?= $this->Form->select('status', [
+                'all' => 'All Status',
+                'pending' => 'Pending',
+                'approved' => 'Approved',
+                'rejected' => 'Rejected'
+            ], [
+                'class' => 'filter-select',
+                'value' => $statusFilter ?? 'all',
+                'empty' => false
+            ]) ?>
+        </div>
+        
+        <div class="filter-group">
+            <label class="filter-label">
+                <i class="bi bi-calendar3"></i>
+                Submit Date Range
+            </label>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <?= $this->Form->date('date_from', [
+                    'class' => 'filter-input',
+                    'value' => $dateFrom ?? '',
+                    'max' => date('Y-m-d'),
+                    'style' => 'flex: 1;'
+                ]) ?>
+                <span style="color: var(--m3-outline); font-weight: 600;">to</span>
+                <?= $this->Form->date('date_to', [
+                    'class' => 'filter-input',
+                    'value' => $dateTo ?? '',
+                    'max' => date('Y-m-d'),
+                    'style' => 'flex: 1;'
+                ]) ?>
+            </div>
+        </div>
+        
+        <div class="filter-group-button">
+            <button type="submit" class="btn-filter">
+                <i class="bi bi-funnel-fill"></i> Apply Filters
+            </button>
+        </div>
+        
+        <?php if (!empty($statusFilter) || !empty($dateFrom) || !empty($dateTo)): ?>
+            <div class="filter-group-button">
+                <?= $this->Html->link(
+                    '<i class="bi bi-x-circle"></i> Clear Filters',
+                    ['action' => 'index', '?' => ['search' => $search]],
+                    ['class' => 'btn-clear-filters', 'escape' => false]
+                ) ?>
+            </div>
+        <?php endif; ?>
+        
+        <?= $this->Form->end() ?>
+    </div>
+
     <!-- Table -->
     <?php if (count($volunteerSignups) > 0): ?>
-        <div class="table-responsive">
+    <div class="table-responsive">
             <table class="table-modern">
-                <thead>
-                    <tr>
+            <thead>
+                <tr>
                         <th>Volunteer</th>
                         <th>Contact</th>
                         <th>Phone</th>
                         <th>Documents</th>
                         <th>Status</th>
                         <th>Submitted</th>
-                        <th class="actions"><?= __('Actions') ?></th>
-                    </tr>
-                </thead>
-                <tbody>
+                    <th class="actions"><?= __('Actions') ?></th>
+                </tr>
+            </thead>
+            <tbody>
                     <?php foreach ($volunteerSignups as $volunteerSignup): 
                         $initials = strtoupper(substr($volunteerSignup->first_name ?? '', 0, 1) . substr($volunteerSignup->last_name ?? '', 0, 1));
                         $status = strtolower($volunteerSignup->status ?? 'pending');
@@ -484,7 +689,7 @@
                                     <?= $volunteerSignup->created ? $volunteerSignup->created->format('M d, Y') : '-' ?>
                                 </div>
                             </td>
-                            <td class="actions">
+                    <td class="actions">
                                 <div class="action-buttons">
                                     <?= $this->Html->link(
                                         '<i class="bi bi-eye"></i>',
@@ -496,10 +701,10 @@
                                         ['action' => 'edit', $volunteerSignup->id],
                                         ['class' => 'btn-action', 'title' => 'Edit', 'escape' => false]
                                     ) ?>
-                                    <?= $this->Form->postLink(
+                        <?= $this->Form->postLink(
                                         '<i class="bi bi-trash"></i>',
-                                        ['action' => 'delete', $volunteerSignup->id],
-                                        [
+                            ['action' => 'delete', $volunteerSignup->id],
+                            [
                                             'class' => 'btn-action danger',
                                             'title' => 'Delete',
                                             'confirm' => __('Are you sure you want to delete signup for {0}?', $volunteerSignup->first_name . ' ' . $volunteerSignup->last_name),
@@ -507,22 +712,22 @@
                                         ]
                                     ) ?>
                                 </div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
 
         <!-- Pagination -->
         <div class="pagination-wrapper">
-            <ul class="pagination">
+        <ul class="pagination">
                 <?= $this->Paginator->first('<i class="bi bi-chevron-double-left"></i>', ['escape' => false]) ?>
                 <?= $this->Paginator->prev('<i class="bi bi-chevron-left"></i>', ['escape' => false]) ?>
-                <?= $this->Paginator->numbers() ?>
+            <?= $this->Paginator->numbers() ?>
                 <?= $this->Paginator->next('<i class="bi bi-chevron-right"></i>', ['escape' => false]) ?>
                 <?= $this->Paginator->last('<i class="bi bi-chevron-double-right"></i>', ['escape' => false]) ?>
-            </ul>
+        </ul>
             <div class="pagination-info">
                 <?= $this->Paginator->counter(__('Page {{page}} of {{pages}}, showing {{current}} record(s) out of {{count}} total')) ?>
             </div>
@@ -532,11 +737,6 @@
             <i class="bi bi-inbox"></i>
             <h3>No Volunteer Signups</h3>
             <p>There are no volunteer signup requests at the moment.</p>
-            <?= $this->Html->link(
-                '<i class="bi bi-plus-circle"></i> Create First Signup',
-                ['action' => 'add'],
-                ['class' => 'btn-add', 'escape' => false]
-            ) ?>
         </div>
     <?php endif; ?>
 </div>
@@ -550,6 +750,119 @@
                 if (e.key === 'Enter') {
                     this.closest('form').submit();
                 }
+            });
+        }
+
+        // Auto submit filters when status changes
+        const statusSelect = document.querySelector('.filter-select[name="status"]');
+        if (statusSelect) {
+            statusSelect.addEventListener('change', function() {
+                // Keep existing filter values
+                const urlParams = new URLSearchParams(window.location.search);
+                const form = this.closest('form');
+                
+                if (urlParams.get('search')) {
+                    if (!form.querySelector('input[name="search"]')) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'search';
+                        input.value = urlParams.get('search');
+                        form.appendChild(input);
+                    }
+                }
+                if (urlParams.get('date_from')) {
+                    if (!form.querySelector('input[name="date_from"]')) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'date_from';
+                        input.value = urlParams.get('date_from');
+                        form.appendChild(input);
+                    }
+                }
+                if (urlParams.get('date_to')) {
+                    if (!form.querySelector('input[name="date_to"]')) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'date_to';
+                        input.value = urlParams.get('date_to');
+                        form.appendChild(input);
+                    }
+                }
+                
+                form.submit();
+            });
+        }
+
+        // Date range validation and auto submit
+        const dateFromInput = document.querySelector('.filter-input[name="date_from"]');
+        const dateToInput = document.querySelector('.filter-input[name="date_to"]');
+        
+        function validateDateRange() {
+            if (dateFromInput && dateToInput && dateFromInput.value && dateToInput.value) {
+                const fromDate = new Date(dateFromInput.value);
+                const toDate = new Date(dateToInput.value);
+                const diffTime = Math.abs(toDate - fromDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays > 15) {
+                    alert('Date range cannot exceed 15 days. Please select a smaller range.');
+                    dateToInput.value = '';
+                    return false;
+                }
+                
+                if (fromDate > toDate) {
+                    alert('Start date must be before or equal to end date.');
+                    dateToInput.value = '';
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        function preserveFilters(form) {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            if (urlParams.get('search')) {
+                if (!form.querySelector('input[name="search"]')) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'search';
+                    input.value = urlParams.get('search');
+                    form.appendChild(input);
+                }
+            }
+            if (urlParams.get('status') && urlParams.get('status') !== 'all') {
+                if (!form.querySelector('input[name="status"]')) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'status';
+                    input.value = urlParams.get('status');
+                    form.appendChild(input);
+                }
+            }
+        }
+        
+        if (dateFromInput) {
+            dateFromInput.addEventListener('change', function() {
+                if (dateToInput && dateToInput.value) {
+                    if (!validateDateRange()) {
+                        return;
+                    }
+                }
+                const form = this.closest('form');
+                preserveFilters(form);
+                form.submit();
+            });
+        }
+        
+        if (dateToInput) {
+            dateToInput.addEventListener('change', function() {
+                if (!validateDateRange()) {
+                    return;
+                }
+                const form = this.closest('form');
+                preserveFilters(form);
+                form.submit();
             });
         }
     });

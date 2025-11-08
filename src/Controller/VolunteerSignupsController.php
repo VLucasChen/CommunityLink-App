@@ -18,8 +18,13 @@ class VolunteerSignupsController extends AppController
     public function index()
     {
         $search = $this->request->getQuery('search');
+        $statusFilter = $this->request->getQuery('status');
+        $dateFrom = $this->request->getQuery('date_from');
+        $dateTo = $this->request->getQuery('date_to');
+        
         $query = $this->VolunteerSignups->find();
         
+        // Search filter
         if ($search) {
             $query->where([
                 'OR' => [
@@ -32,9 +37,29 @@ class VolunteerSignupsController extends AppController
             ]);
         }
         
+        // Status filter
+        if ($statusFilter && $statusFilter !== 'all') {
+            $query->where(['status' => $statusFilter]);
+        }
+        
+        // Date range filter
+        if ($dateFrom && $dateTo) {
+            $startDate = $dateFrom . ' 00:00:00';
+            $endDate = $dateTo . ' 23:59:59';
+            $query->where(function ($exp) use ($startDate, $endDate) {
+                return $exp->between('created', $startDate, $endDate);
+            });
+        } elseif ($dateFrom) {
+            $startDate = $dateFrom . ' 00:00:00';
+            $query->where(['created >=' => $startDate]);
+        } elseif ($dateTo) {
+            $endDate = $dateTo . ' 23:59:59';
+            $query->where(['created <=' => $endDate]);
+        }
+        
         $volunteerSignups = $this->paginate($query);
 
-        $this->set(compact('volunteerSignups', 'search'));
+        $this->set(compact('volunteerSignups', 'search', 'statusFilter', 'dateFrom', 'dateTo'));
     }
 
     /**
