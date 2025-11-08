@@ -424,10 +424,10 @@
             <tbody>
                 <?php foreach ($volunteers as $volunteer): 
                     $initials = strtoupper(substr($volunteer->first_name ?? '', 0, 1) . substr($volunteer->last_name ?? '', 0, 1));
-                    $status = strtolower($volunteer->status ?? 'pending');
+                    $status = strtolower($volunteer->status ?? 'inactive');
                     $statusClass = match($status) {
-                        'approved' => 'approved',
-                        'rejected' => 'rejected',
+                        'active' => 'approved',
+                        'inactive' => 'pending',
                         default => 'pending'
                     };
                 ?>
@@ -470,12 +470,10 @@
                             <span class="status-badge <?= $statusClass ?>">
                                 <?php if ($statusClass === 'approved'): ?>
                                     <i class="bi bi-check-circle"></i>
-                                <?php elseif ($statusClass === 'rejected'): ?>
-                                    <i class="bi bi-x-circle"></i>
                                 <?php else: ?>
                                     <i class="bi bi-clock"></i>
                                 <?php endif; ?>
-                                <?= h(ucfirst($volunteer->status ?? 'Pending')) ?>
+                                <?= h(ucfirst($volunteer->status ?? 'Inactive')) ?>
                             </span>
                         </td>
                         <td>
@@ -488,17 +486,17 @@
                             <div class="action-buttons">
                                 <?= $this->Html->link(
                                     '<i class="bi bi-eye"></i>',
-                                    ['action' => 'view', $volunteer->volunteer_id],
+                                    ['action' => 'view', $volunteer->id],
                                     ['class' => 'btn-action', 'title' => 'View', 'escape' => false]
                                 ) ?>
                                 <?= $this->Html->link(
                                     '<i class="bi bi-pencil"></i>',
-                                    ['action' => 'edit', $volunteer->volunteer_id],
+                                    ['action' => 'edit', $volunteer->id],
                                     ['class' => 'btn-action', 'title' => 'Edit', 'escape' => false]
                                 ) ?>
-                                <?= $this->Form->postLink(
+                        <?= $this->Form->postLink(
                                     '<i class="bi bi-trash"></i>',
-                                    ['action' => 'delete', $volunteer->volunteer_id],
+                                    ['action' => 'delete', $volunteer->id],
                                     [
                                         'class' => 'btn-action danger',
                                         'title' => 'Delete',
@@ -507,8 +505,8 @@
                                     ]
                                 ) ?>
                             </div>
-                        </td>
-                    </tr>
+                    </td>
+                </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>

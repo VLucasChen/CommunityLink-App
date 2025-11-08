@@ -332,12 +332,10 @@
                     <?= $this->Form->control('status', [
                         'label' => 'Status',
                         'options' => [
-                            'pending' => 'Pending',
-                            'approved' => 'Approved',
-                            'rejected' => 'Rejected'
+                            'inactive' => 'Inactive',
+                            'active' => 'Active'
                         ],
-                        'class' => 'form-select',
-                        'empty' => '— Select Status —'
+                        'class' => 'form-select'
                     ]) ?>
                 </div>
             </div>

@@ -32,7 +32,20 @@ class VolunteersController extends AppController
      */
     public function view($id = null)
     {
-        $volunteer = $this->Volunteers->get($id, contain: []);
+        if (!$id) {
+            $this->Flash->error(__('Invalid volunteer ID.'));
+            return $this->redirect(['action' => 'index']);
+        }
+
+        $volunteer = $this->Volunteers->find()
+            ->where(['Volunteers.id' => $id])
+            ->first();
+
+        if (!$volunteer) {
+            $this->Flash->error(__('Volunteer not found.'));
+            return $this->redirect(['action' => 'index']);
+        }
+
         $this->set(compact('volunteer'));
     }
 
@@ -45,7 +58,39 @@ class VolunteersController extends AppController
     {
         $volunteer = $this->Volunteers->newEmptyEntity();
         if ($this->request->is('post')) {
-            $volunteer = $this->Volunteers->patchEntity($volunteer, $this->request->getData());
+            $data = $this->request->getData();
+
+            // Handle profile_picture upload
+            if (isset($data['profile_picture']) && $data['profile_picture'] instanceof \Laminas\Diactoros\UploadedFile) {
+                if (!empty($data['profile_picture']->getClientFilename()) && $data['profile_picture']->getError() === UPLOAD_ERR_OK) {
+                    $file = time() . '_' . $data['profile_picture']->getClientFilename();
+                    $uploadDir = WWW_ROOT . 'uploads' . DS . 'volunteers' . DS . 'profiles' . DS;
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    $data['profile_picture']->moveTo($uploadDir . $file);
+                    $data['profile_picture'] = 'uploads/volunteers/profiles/' . $file;
+                } else {
+                    unset($data['profile_picture']);
+                }
+            }
+
+            // Handle documents upload
+            if (isset($data['documents']) && $data['documents'] instanceof \Laminas\Diactoros\UploadedFile) {
+                if (!empty($data['documents']->getClientFilename()) && $data['documents']->getError() === UPLOAD_ERR_OK) {
+                    $file = time() . '_' . $data['documents']->getClientFilename();
+                    $uploadDir = WWW_ROOT . 'uploads' . DS . 'volunteers' . DS . 'documents' . DS;
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    $data['documents']->moveTo($uploadDir . $file);
+                    $data['documents'] = 'uploads/volunteers/documents/' . $file;
+                } else {
+                    unset($data['documents']);
+                }
+            }
+
+            $volunteer = $this->Volunteers->patchEntity($volunteer, $data);
             if ($this->Volunteers->save($volunteer)) {
                 $this->Flash->success(__('The volunteer has been saved.'));
 
@@ -65,9 +110,58 @@ class VolunteersController extends AppController
      */
     public function edit($id = null)
     {
-        $volunteer = $this->Volunteers->get($id, contain: []);
+        if (!$id) {
+            $this->Flash->error(__('Invalid volunteer ID.'));
+            return $this->redirect(['action' => 'index']);
+        }
+
+        $volunteer = $this->Volunteers->find()
+            ->where(['Volunteers.id' => $id])
+            ->first();
+
+        if (!$volunteer) {
+            $this->Flash->error(__('Volunteer not found.'));
+            return $this->redirect(['action' => 'index']);
+        }
+
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $volunteer = $this->Volunteers->patchEntity($volunteer, $this->request->getData());
+            $data = $this->request->getData();
+
+            // Handle profile_picture upload
+            if (isset($data['profile_picture']) && $data['profile_picture'] instanceof \Laminas\Diactoros\UploadedFile) {
+                if (!empty($data['profile_picture']->getClientFilename()) && $data['profile_picture']->getError() === UPLOAD_ERR_OK) {
+                    // New file uploaded, process it
+                    $file = time() . '_' . $data['profile_picture']->getClientFilename();
+                    $uploadDir = WWW_ROOT . 'uploads' . DS . 'volunteers' . DS . 'profiles' . DS;
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    $data['profile_picture']->moveTo($uploadDir . $file);
+                    $data['profile_picture'] = 'uploads/volunteers/profiles/' . $file;
+                } else {
+                    // No file uploaded, remove from data to keep existing value
+                    unset($data['profile_picture']);
+                }
+            }
+
+            // Handle documents upload
+            if (isset($data['documents']) && $data['documents'] instanceof \Laminas\Diactoros\UploadedFile) {
+                if (!empty($data['documents']->getClientFilename()) && $data['documents']->getError() === UPLOAD_ERR_OK) {
+                    // New file uploaded, process it
+                    $file = time() . '_' . $data['documents']->getClientFilename();
+                    $uploadDir = WWW_ROOT . 'uploads' . DS . 'volunteers' . DS . 'documents' . DS;
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    $data['documents']->moveTo($uploadDir . $file);
+                    $data['documents'] = 'uploads/volunteers/documents/' . $file;
+                } else {
+                    // No file uploaded, remove from data to keep existing value
+                    unset($data['documents']);
+                }
+            }
+
+            $volunteer = $this->Volunteers->patchEntity($volunteer, $data);
             if ($this->Volunteers->save($volunteer)) {
                 $this->Flash->success(__('The volunteer has been saved.'));
 
@@ -88,7 +182,21 @@ class VolunteersController extends AppController
     public function delete($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
-        $volunteer = $this->Volunteers->get($id);
+
+        if (!$id) {
+            $this->Flash->error(__('Invalid volunteer ID.'));
+            return $this->redirect(['action' => 'index']);
+        }
+
+        $volunteer = $this->Volunteers->find()
+            ->where(['Volunteers.id' => $id])
+            ->first();
+
+        if (!$volunteer) {
+            $this->Flash->error(__('Volunteer not found.'));
+            return $this->redirect(['action' => 'index']);
+        }
+
         if ($this->Volunteers->delete($volunteer)) {
             $this->Flash->success(__('The volunteer has been deleted.'));
         } else {

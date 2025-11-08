@@ -283,12 +283,12 @@
             ) ?>
             <?= $this->Html->link(
                 '<i class="bi bi-pencil"></i> Edit',
-                ['action' => 'edit', $volunteer->volunteer_id],
+                ['action' => 'edit', $volunteer->id],
                 ['class' => 'btn-action btn-primary', 'escape' => false]
             ) ?>
             <?= $this->Form->postLink(
                 '<i class="bi bi-trash"></i> Delete',
-                ['action' => 'delete', $volunteer->volunteer_id],
+                ['action' => 'delete', $volunteer->id],
                 [
                     'class' => 'btn-action btn-danger',
                     'confirm' => __('Are you sure you want to delete volunteer {0}?', $volunteer->first_name . ' ' . $volunteer->last_name),
@@ -303,10 +303,10 @@
         <div class="card-header">
             <?php
             $initials = strtoupper(substr($volunteer->first_name ?? '', 0, 1) . substr($volunteer->last_name ?? '', 0, 1));
-            $status = strtolower($volunteer->status ?? 'pending');
+            $status = strtolower($volunteer->status ?? 'inactive');
             $statusClass = match($status) {
-                'approved' => 'approved',
-                'rejected' => 'rejected',
+                'active' => 'approved',
+                'inactive' => 'pending',
                 default => 'pending'
             };
             ?>
@@ -326,12 +326,10 @@
                 <span class="status-badge <?= $statusClass ?>">
                     <?php if ($statusClass === 'approved'): ?>
                         <i class="bi bi-check-circle"></i>
-                    <?php elseif ($statusClass === 'rejected'): ?>
-                        <i class="bi bi-x-circle"></i>
                     <?php else: ?>
                         <i class="bi bi-clock"></i>
                     <?php endif; ?>
-                    <?= h(ucfirst($volunteer->status ?? 'Pending')) ?>
+                    <?= h(ucfirst($volunteer->status ?? 'Inactive')) ?>
                 </span>
             </div>
         </div>
@@ -371,8 +369,8 @@
                         <div style="font-weight: 600; color: var(--m3-on-surface); margin-bottom: 0.25rem;">Profile Picture</div>
                         <?= $this->Html->link(
                             'View/Download',
-                            '/files/volunteers/profile_picture/' . h($volunteer->profile_picture),
-                            ['style' => 'color: var(--m3-primary); text-decoration: none; font-size: 0.875rem;']
+                            '/' . h($volunteer->profile_picture),
+                            ['style' => 'color: var(--m3-primary); text-decoration: none; font-size: 0.875rem;', 'target' => '_blank']
                         ) ?>
                     </div>
                 </div>
@@ -389,8 +387,8 @@
                         <div style="font-weight: 600; color: var(--m3-on-surface); margin-bottom: 0.25rem;">Attached Documents</div>
                         <?= $this->Html->link(
                             'View/Download',
-                            '/files/volunteers/documents/' . h($volunteer->documents),
-                            ['style' => 'color: var(--m3-primary); text-decoration: none; font-size: 0.875rem;']
+                            '/' . h($volunteer->documents),
+                            ['style' => 'color: var(--m3-primary); text-decoration: none; font-size: 0.875rem;', 'target' => '_blank']
                         ) ?>
                     </div>
                 </div>
