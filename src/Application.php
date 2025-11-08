@@ -119,10 +119,44 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
      */
     public function getAuthenticationService(ServerRequestInterface $request): AuthenticationServiceInterface
     {
-        $authenticationService = new AuthenticationService([
-            'unauthenticatedRedirect' => '/users/login',
-            'queryParam' => 'redirect',
-        ]);
+        $path = $request->getUri()->getPath();
+        
+        // Define paths that don't require authentication
+        $publicPaths = [
+            '/users/login',
+            '/users/logout',
+            '/',
+            '/pages/home',
+            '/volunteer-signups/public-signup',
+            '/organisations/public-signup',
+            '/contact-messages/public-contact',
+        ];
+        
+        // Check if current path is public
+        $isPublic = false;
+        foreach ($publicPaths as $publicPath) {
+            if ($path === $publicPath || strpos($path, $publicPath . '/') === 0) {
+                $isPublic = true;
+                break;
+            }
+        }
+        
+        // Configure authentication service
+        // For public pages, don't require authentication and don't redirect
+        if ($isPublic) {
+            $config = [
+                'queryParam' => 'redirect',
+                // Don't require identity for public pages
+                'requireIdentity' => false,
+            ];
+        } else {
+            $config = [
+                'queryParam' => 'redirect',
+                'unauthenticatedRedirect' => '/users/login',
+            ];
+        }
+        
+        $authenticationService = new AuthenticationService($config);
 
         // Load identifiers, ensuring we check username and password
         $authenticationService->loadIdentifier('Authentication.Password', [

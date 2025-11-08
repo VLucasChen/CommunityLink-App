@@ -43,7 +43,12 @@ class AppController extends Controller
         parent::initialize();
 
         $this->loadComponent('Flash');
-        $this->loadComponent('Authentication.Authentication');
+        // Paginator is built into Controller in CakePHP 5, no need to load it
+        $this->loadComponent('Authentication.Authentication', [
+            'logoutRedirect' => '/users/login',
+            // Don't require authentication for public actions
+            'requireIdentity' => false, // Let individual actions control access
+        ]);
 
         /*
          * Enable the following component for recommended CakePHP form protection settings.
@@ -53,75 +58,66 @@ class AppController extends Controller
     }
 
     /**
-     * Check if current user has required role
-     * 
-     * @param string|array $roles Required role(s) - 'admin', 'assistant', or ['admin', 'assistant']
+     * Check if user is logged in - A5 equivalent to A3 isLoggedIn()
+     *
      * @return bool
      */
-    protected function checkRole($roles): bool
+    protected function isLoggedIn(): bool
     {
-        $identity = $this->Authentication->getIdentity();
-        if (!$identity) {
-            return false;
-        }
-
-        $userRole = null;
-        if (is_object($identity)) {
-            $userRole = $identity->role ?? null;
-            if (!$userRole && method_exists($identity, 'get')) {
-                $userRole = $identity->get('role');
-            }
-        } elseif (is_array($identity)) {
-            $userRole = $identity['role'] ?? $identity['data']['role'] ?? null;
-        }
-
-        if (!$userRole) {
-            return false;
-        }
-
-        $roles = is_array($roles) ? $roles : [$roles];
-        return in_array(strtolower($userRole), array_map('strtolower', $roles));
+        $result = $this->Authentication->getResult();
+        return $result->isValid();
     }
 
     /**
-     * Require role - redirect if user doesn't have required role
-     * 
-     * @param string|array $roles Required role(s)
+     * Require login - A5 equivalent to A3 requireLogin()
+     * Redirects to login if not logged in
+     *
      * @return void
      */
-    protected function requireRole($roles): void
+    protected function requireLogin(): void
     {
-        if (!$this->checkRole($roles)) {
-            $this->Flash->error(__('You do not have permission to access this page.'));
-            
-            // Get current user to determine redirect
-            $identity = $this->Authentication->getIdentity();
-            $userRole = null;
-            if (is_object($identity)) {
-                $userRole = $identity->role ?? null;
-            } elseif (is_array($identity)) {
-                $userRole = $identity['role'] ?? $identity['data']['role'] ?? null;
-            }
-            
-            // Redirect based on role
-            if (strtolower($userRole) === 'volunteer') {
-                // Volunteer can access their profile
-                $userId = null;
-                if (is_object($identity)) {
-                    $userId = $identity->id ?? null;
-                } elseif (is_array($identity)) {
-                    $userId = $identity['id'] ?? $identity['data']['id'] ?? null;
+        $result = $this->Authentication->getResult();
+        if (!$result->isValid()) {
+            // Check if we're already on login page to avoid redirect loops
+            $currentUrl = $this->request->getUri()->getPath();
+            if ($currentUrl !== '/users/login' && $currentUrl !== '/users/logout') {
+                // Use redirect with proper URL encoding to avoid loops
+                $redirectUrl = '/users/login';
+                $currentPath = $this->request->getRequestTarget();
+                if ($currentPath !== '/users/login' && $currentPath !== '/users/logout') {
+                    $redirectUrl .= '?redirect=' . urlencode($currentPath);
                 }
-                if ($userId) {
-                    $this->redirect(['controller' => 'Users', 'action' => 'profile', $userId]);
-                } else {
-                    $this->redirect(['controller' => 'Public', 'action' => 'home']);
-                }
-            } else {
-                // Not logged in or other roles
-                $this->redirect(['controller' => 'Public', 'action' => 'home']);
+                $this->redirect($redirectUrl);
             }
         }
+    }
+
+    /**
+     * Require admin access - A5 equivalent to A3 requireAdmin()
+     * Only admins and assistants can access
+     *
+     * @return void
+     */
+    protected function requireAdmin(): void
+    {
+        $this->requireLogin();
+        $user = $this->Authentication->getIdentity();
+        $role = $user ? $user->get('role') : null;
+        if (!$user || !in_array($role, ['admin', 'assistant'], true)) {
+            $this->Flash->error(__('You do not have permission to access this page.'));
+            $this->redirect(['controller' => 'Pages', 'action' => 'home']);
+        }
+    }
+
+    /**
+     * Check if current user is volunteer - A5 equivalent to A3 isVolunteer()
+     *
+     * @return bool
+     */
+    protected function isVolunteer(): bool
+    {
+        $user = $this->Authentication->getIdentity();
+        return $user && ($user->get('role') === 'volunteer');
     }
 }
 

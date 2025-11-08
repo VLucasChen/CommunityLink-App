@@ -15,7 +15,11 @@ class UsersController extends AppController
     public function initialize(): void
     {
         parent::initialize();
-        $this->loadComponent('Authentication.Authentication');
+        $this->loadComponent('Authentication.Authentication', [
+            'logoutRedirect' => '/users/login'
+        ]);
+        
+        // Allow login and logout actions without authentication
         $this->Authentication->allowUnauthenticated(['login', 'logout']);
     }
     /**
@@ -25,23 +29,31 @@ class UsersController extends AppController
      */
     public function index()
     {
-        // Only admin and assistant can access
-        $this->requireRole(['admin', 'assistant']);
-
+        $this->requireLogin();
+        $this->requireAdmin();
+        
+        // Disable layout for admin pages (has full HTML with sidebar like A3)
+        $this->viewBuilder()->setLayout(null);
+        
         $query = $this->Users->find()
             ->contain(['Volunteers']);
-        $users = $this->paginate($query);
 
-        // Get current user role for UI restrictions
-        $identity = $this->Authentication->getIdentity();
-        $currentUserRole = null;
-        if (is_object($identity)) {
-            $currentUserRole = $identity->role ?? null;
-        } elseif (is_array($identity)) {
-            $currentUserRole = $identity['role'] ?? $identity['data']['role'] ?? null;
+        // Filters: username and role
+        $username = $this->request->getQuery('username');
+        if ($username) {
+            $query->where(['Users.username LIKE' => '%' . $username . '%']);
+        }
+        $role = $this->request->getQuery('role');
+        if ($role && in_array($role, ['admin', 'assistant', 'volunteer'], true)) {
+            $query->where(['Users.role' => $role]);
         }
 
-        $this->set(compact('users', 'currentUserRole'));
+        // A5 Requirement: Server-side pagination using QueryBuilder
+        $users = $this->paginate($query->order(['Users.username' => 'ASC']), [
+            'limit' => 10
+        ]);
+
+        $this->set(compact('users', 'username', 'role'));
     }
 
     /**
@@ -53,35 +65,9 @@ class UsersController extends AppController
      */
     public function view($id = null)
     {
-        // Only admin and assistant can access
-        $this->requireRole(['admin', 'assistant']);
-
-        $user = $this->Users->get($id, contain: ['Volunteers']);
-        
-        // Get current user role for UI restrictions
-        $identity = $this->Authentication->getIdentity();
-        $currentUserRole = null;
-        if (is_object($identity)) {
-            $currentUserRole = $identity->role ?? null;
-        } elseif (is_array($identity)) {
-            $currentUserRole = $identity['role'] ?? $identity['data']['role'] ?? null;
-        }
-
-        $this->set(compact('user', 'currentUserRole'));
-    }
-
-    /**
-     * Profile method - Public profile page
-     *
-     * @param string|null $id User id.
-     * @return \Cake\Http\Response|null|void Renders view
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
-    public function profile($id = null)
-    {
-        // Only admin and assistant can access
-        $this->requireRole(['admin', 'assistant']);
-        
+        $this->requireLogin();
+        $this->requireAdmin();
+        $this->viewBuilder()->setLayout(null);
         $user = $this->Users->get($id, contain: ['Volunteers']);
         $this->set(compact('user'));
     }
@@ -93,36 +79,50 @@ class UsersController extends AppController
      */
     public function add()
     {
-        // Only admin and assistant can access
-        $this->requireRole(['admin', 'assistant']);
-
+        $this->requireLogin();
+        $this->requireAdmin();
+        $this->viewBuilder()->setLayout(null);
         $user = $this->Users->newEmptyEntity();
         if ($this->request->is('post')) {
             $data = $this->request->getData();
-            
-            // Password is required when adding a new user
-            if (empty($data['password'])) {
-                $this->Flash->error(__('Password is required when creating a new user.'));
-                $volunteers = $this->Users->Volunteers->find('list', limit: 200)->all();
-                $this->set(compact('user', 'volunteers'));
-                return;
-            }
-            
-            // If role is admin or assistant, remove volunteer_id
-            if (isset($data['role']) && in_array($data['role'], ['admin', 'assistant'])) {
-                $data['volunteer_id'] = null;
-            }
-            
-            $user = $this->Users->patchEntity($user, $data);
-            if ($this->Users->save($user)) {
-                $this->Flash->success(__('The user has been saved.'));
-                // Reload the entity to get saved data
-                $user = $this->Users->get($user->id, contain: []);
+            // A3-like server-side checks
+            if (!empty($data['role']) && $data['role'] === 'volunteer' && empty($data['volunteer_id'])) {
+                $this->Flash->error(__('Please select a volunteer for volunteer role.'));
+            } elseif (empty($data['password'])) {
+                $this->Flash->error(__('Password is required for new users.'));
+            } elseif (empty($data['confirm_password'])) {
+                $this->Flash->error(__('Please confirm your password.'));
+            } elseif ($data['password'] !== $data['confirm_password']) {
+                $this->Flash->error(__('Passwords do not match.'));
             } else {
-                $this->Flash->error(__('The user could not be saved. Please, try again.'));
+                $user = $this->Users->patchEntity($user, $data);
+                if ($this->Users->save($user)) {
+                    $this->Flash->success(__('The user has been saved.'));
+
+                    return $this->redirect(['action' => 'index']);
+                }
+                // Display validation errors if save fails
+                $errors = $user->getErrors();
+                if (!empty($errors)) {
+                    foreach ($errors as $field => $fieldErrors) {
+                        foreach ($fieldErrors as $error) {
+                            $this->Flash->error(__('{0}: {1}', [ucfirst($field), $error]));
+                        }
+                    }
+                } else {
+                    $this->Flash->error(__('The user could not be saved. Please, try again.'));
+                }
             }
         }
-        $volunteers = $this->Users->Volunteers->find('list', limit: 200)->all();
+        $volunteers = $this->Users->Volunteers
+            ->find('list', keyField: 'id', valueField: function ($row) {
+                $first = (string)($row->first_name ?? '');
+                $last = (string)($row->last_name ?? '');
+                $full = trim($first . ' ' . $last);
+                return $full !== '' ? $full : ($row->full_name ?? 'Volunteer');
+            })
+            ->order(['first_name' => 'ASC', 'last_name' => 'ASC'])
+            ->all();
         $this->set(compact('user', 'volunteers'));
     }
 
@@ -135,33 +135,77 @@ class UsersController extends AppController
      */
     public function edit($id = null)
     {
-        // Only admin and assistant can access
-        $this->requireRole(['admin', 'assistant']);
-
+        $this->requireLogin();
+        $this->requireAdmin();
+        $this->viewBuilder()->setLayout(null);
         $user = $this->Users->get($id, contain: []);
         if ($this->request->is(['patch', 'post', 'put'])) {
             $data = $this->request->getData();
-            
-            // If password is empty, remove it from data to keep current password
+            // If password empty, do not change it
             if (empty($data['password'])) {
                 unset($data['password']);
+            } else {
+                // If password is provided, confirm_password is required and must match
+                if (empty($data['confirm_password'])) {
+                    $this->Flash->error(__('Please confirm your new password.'));
+                    // A5 Requirement: Use virtual fields for unambiguous dropdowns
+                    $volunteers = $this->Users->Volunteers->find('list', [
+                        'keyField' => 'id',
+                        'valueField' => function ($row) {
+                            $first = (string)($row->first_name ?? '');
+                            $last = (string)($row->last_name ?? '');
+                            $full = trim($first . ' ' . $last);
+                            return $full !== '' ? $full . ' (' . $row->email . ')' : ($row->full_name ?? 'Volunteer');
+                        }
+                    ])->order(['first_name' => 'ASC', 'last_name' => 'ASC'])->all();
+                    $this->set(compact('user', 'volunteers'));
+                    return;
+                } elseif ($data['password'] !== $data['confirm_password']) {
+                    $this->Flash->error(__('Passwords do not match.'));
+                    // A5 Requirement: Use virtual fields for unambiguous dropdowns
+                    $volunteers = $this->Users->Volunteers->find('list', [
+                        'keyField' => 'id',
+                        'valueField' => function ($row) {
+                            $first = (string)($row->first_name ?? '');
+                            $last = (string)($row->last_name ?? '');
+                            $full = trim($first . ' ' . $last);
+                            return $full !== '' ? $full . ' (' . $row->email . ')' : ($row->full_name ?? 'Volunteer');
+                        }
+                    ])->order(['first_name' => 'ASC', 'last_name' => 'ASC'])->all();
+                    $this->set(compact('user', 'volunteers'));
+                    return;
+                }
             }
-            
-            // If role is admin or assistant, remove volunteer_id
-            if (isset($data['role']) && in_array($data['role'], ['admin', 'assistant'])) {
-                $data['volunteer_id'] = null;
+            if (!empty($data['role']) && $data['role'] === 'volunteer' && empty($data['volunteer_id'])) {
+                $this->Flash->error(__('Please select a volunteer for volunteer role.'));
             }
-            
             $user = $this->Users->patchEntity($user, $data);
             if ($this->Users->save($user)) {
                 $this->Flash->success(__('The user has been saved.'));
-                // Reload the entity to get updated data
-                $user = $this->Users->get($id, contain: []);
+
+                return $this->redirect(['action' => 'index']);
+            }
+            // Display validation errors if save fails
+            $errors = $user->getErrors();
+            if (!empty($errors)) {
+                foreach ($errors as $field => $fieldErrors) {
+                    foreach ($fieldErrors as $error) {
+                        $this->Flash->error(__('{0}: {1}', [ucfirst($field), $error]));
+                    }
+                }
             } else {
                 $this->Flash->error(__('The user could not be saved. Please, try again.'));
             }
         }
-        $volunteers = $this->Users->Volunteers->find('list', limit: 200)->all();
+        $volunteers = $this->Users->Volunteers
+            ->find('list', keyField: 'id', valueField: function ($row) {
+                $first = (string)($row->first_name ?? '');
+                $last = (string)($row->last_name ?? '');
+                $full = trim($first . ' ' . $last);
+                return $full !== '' ? $full : ($row->full_name ?? 'Volunteer');
+            })
+            ->order(['first_name' => 'ASC', 'last_name' => 'ASC'])
+            ->all();
         $this->set(compact('user', 'volunteers'));
     }
 
@@ -174,24 +218,23 @@ class UsersController extends AppController
      */
     public function delete($id = null)
     {
-        // Only admin and assistant can access
-        $this->requireRole(['admin', 'assistant']);
-
+        $this->requireLogin();
         $this->request->allowMethod(['post', 'delete']);
         $user = $this->Users->get($id);
         
-        // Check if current user is assistant trying to delete an admin
-        $identity = $this->Authentication->getIdentity();
-        $currentUserRole = null;
-        if (is_object($identity)) {
-            $currentUserRole = $identity->role ?? null;
-        } elseif (is_array($identity)) {
-            $currentUserRole = $identity['role'] ?? $identity['data']['role'] ?? null;
+        // A5 Requirement: Assistant cannot delete Amy/admin users
+        $currentUser = $this->Authentication->getIdentity();
+        $currentRole = $currentUser ? ($currentUser->get('role') ?? '') : '';
+        if (!in_array($currentRole, ['admin', 'assistant'], true)) {
+            $this->Flash->error(__('You do not have permission to delete users.'));
+            return $this->redirect(['action' => 'index']);
         }
-        
-        // Assistant cannot delete admin users
-        if (strtolower($currentUserRole) === 'assistant' && strtolower($user->role) === 'admin') {
-            $this->Flash->error(__('You do not have permission to delete admin users.'));
+        if ($currentUser && (string)$currentUser->getIdentifier() === (string)$user->id) {
+            $this->Flash->error(__('You cannot delete your own account.'));
+            return $this->redirect(['action' => 'index']);
+        }
+        if ($currentRole === 'assistant' && ($user->get('role') === 'admin' || $user->get('username') === 'AmyTan')) {
+            $this->Flash->error(__('Assistants cannot delete administrator accounts.'));
             return $this->redirect(['action' => 'index']);
         }
         
@@ -206,47 +249,43 @@ class UsersController extends AppController
 
     /**
      * Login method - A5 Authentication equivalent to A3 login
+     * Preserves A3 functionality: role-based redirect (admin→dashboard, volunteer→profile)
      *
      * @return \Cake\Http\Response|null|void Renders view
      */
     public function login()
     {
         $this->request->allowMethod(['get', 'post']);
+        
+        // Disable layout since login template has its own full HTML (A3 style)
+        $this->viewBuilder()->setLayout(null);
+        
         $result = $this->Authentication->getResult();
         
+        // If user is logged in, redirect based on role (A3 behavior)
         if ($result->isValid()) {
-            // Get user identity to determine redirect based on role
-            $identity = $this->Authentication->getIdentity();
-            $userRole = null;
-            $userId = null;
+            $user = $this->Authentication->getIdentity();
+            $redirect = $this->request->getQuery('redirect');
             
-            if (is_object($identity)) {
-                $userRole = $identity->role ?? null;
-                $userId = $identity->id ?? null;
-            } elseif (is_array($identity)) {
-                $userRole = $identity['role'] ?? $identity['data']['role'] ?? null;
-                $userId = $identity['id'] ?? $identity['data']['id'] ?? null;
+            // If no redirect specified, use role-based redirect (A3 logic)
+            if (!$redirect) {
+                $role = $user->get('role');
+                if ($role === 'admin' || $role === 'assistant') {
+                    $redirect = ['controller' => 'Pages', 'action' => 'dashboard'];
+                } else {
+                    // Volunteer redirect to profile page (A3 behavior)
+                    $redirect = ['controller' => 'Volunteers', 'action' => 'profile'];
+                }
             }
             
-            // Redirect based on role
-            if (strtolower($userRole) === 'volunteer') {
-                // Volunteer redirects to public home
-                return $this->redirect(['controller' => 'Public', 'action' => 'home']);
-            } elseif (in_array(strtolower($userRole), ['admin', 'assistant'])) {
-                // Admin and assistant redirect to dashboard
-                $target = $this->Authentication->getLoginRedirect() ?? ['controller' => 'Pages', 'action' => 'dashboard'];
-                return $this->redirect($target);
-            } else {
-                // Default fallback
-                return $this->redirect(['controller' => 'Public', 'action' => 'home']);
-            }
+            return $this->redirect($redirect);
         }
-
+        
+        // Display error if user submitted and authentication failed (A3 validation behavior)
         if ($this->request->is('post') && !$result->isValid()) {
             $this->Flash->error(__('Invalid username or password'));
         }
     }
-
 
     /**
      * Logout method - A5 Authentication equivalent to A3 logout
