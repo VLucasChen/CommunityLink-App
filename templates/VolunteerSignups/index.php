@@ -867,3 +867,11 @@
         }
     });
 </script>
+
+<?= $this->element('success_modal', [
+    'modalId' => 'deleteSuccessModal',
+    'title' => 'Delete Successful!',
+    'message' => 'The volunteer signup has been deleted successfully.',
+    'actionLink' => null,
+    'actionText' => null
+]) ?>

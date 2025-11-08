@@ -119,10 +119,11 @@ class VolunteerSignupsController extends AppController
             $volunteerSignup = $this->VolunteerSignups->patchEntity($volunteerSignup, $data);
             if ($this->VolunteerSignups->save($volunteerSignup)) {
                 $this->Flash->success(__('The volunteer signup has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
+                // Reload the entity to get saved data
+                $volunteerSignup = $this->VolunteerSignups->get($volunteerSignup->id, contain: []);
+            } else {
+                $this->Flash->error(__('The volunteer signup could not be saved. Please, try again.'));
             }
-            $this->Flash->error(__('The volunteer signup could not be saved. Please, try again.'));
         }
         $this->set(compact('volunteerSignup'));
     }

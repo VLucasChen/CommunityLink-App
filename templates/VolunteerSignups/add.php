@@ -574,6 +574,14 @@
     <?= $this->Form->end() ?>
 </div>
 
+<?= $this->element('success_modal', [
+    'modalId' => 'successModal',
+    'title' => 'Create Successful!',
+    'message' => 'The volunteer signup has been created successfully.',
+    'actionLink' => ['action' => 'index'],
+    'actionText' => 'View List'
+]) ?>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // File name display
