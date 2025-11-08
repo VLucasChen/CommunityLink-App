@@ -769,13 +769,45 @@ document.addEventListener('DOMContentLoaded', function () {
             const getFieldHTML = (name, colClass = 'col-md-6') => {
                 const el = document.querySelector(`#hiddenFormFields [name="${name}"]`);
                 if (!el) return '';
+                
+                // Tìm form group chứa label và input (CakePHP tạo div.mb-3)
+                let formGroup = el.closest('.mb-3');
+                
+                // Nếu không tìm thấy, thử tìm parent div
+                if (!formGroup) {
+                    formGroup = el.parentElement;
+                }
+                
                 const wrapper = document.createElement('div');
                 wrapper.className = colClass + ' mb-3';
-                const formGroup = el.closest('.mb-3');
-                if (formGroup) {
+                
+                if (formGroup && formGroup.innerHTML) {
+                    // Lấy toàn bộ HTML của form group (bao gồm label)
                     wrapper.innerHTML = formGroup.innerHTML;
                 } else {
-                    wrapper.innerHTML = el.outerHTML;
+                    // Fallback: tìm label trong cùng parent
+                    const parent = el.parentElement;
+                    let html = '';
+                    if (parent) {
+                        const label = parent.querySelector('label');
+                        if (label) {
+                            html = label.outerHTML;
+                        }
+                    }
+                    // Nếu vẫn không có label, tìm bằng for attribute
+                    if (!html) {
+                        const label = document.querySelector(`#hiddenFormFields label[for="${el.id}"]`);
+                        if (label) {
+                            html = label.outerHTML;
+                        }
+                    }
+                    // Nếu vẫn không có, tạo label từ name
+                    if (!html) {
+                        const labelText = name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        html = `<label for="${el.id || name}" class="form-label">${labelText}</label>`;
+                    }
+                    html += el.outerHTML;
+                    wrapper.innerHTML = html;
                 }
                 return wrapper.outerHTML;
             };
