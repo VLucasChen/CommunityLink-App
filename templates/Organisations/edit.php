@@ -308,10 +308,9 @@
 
         <!-- Action Buttons -->
         <div class="form-actions">
-            <?= $this->Form->button(
-                '<i class="bi bi-check-circle"></i> Update Organisation',
-                ['class' => 'btn-submit', 'escape' => false]
-            ) ?>
+            <button type="submit" class="btn-submit">
+                <i class="bi bi-check-circle"></i> Update Organisation
+            </button>
             <?= $this->Html->link(
                 '<i class="bi bi-x-lg"></i> Cancel',
                 ['action' => 'index'],
