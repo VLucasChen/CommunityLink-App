@@ -1,540 +1,391 @@
 <?php
 /**
+ * Dashboard page for CommunityLink admin - A5 CakePHP version
+ * Based on A3 dashboard.php, adapted for CakePHP with same Bootstrap styling
+ * 
  * @var \App\View\AppView $this
- * @var \App\Model\Entity\User $user
+ * @var int $eventCount
+ * @var int $volunteerCount
+ * @var int $orgCount
+ * @var int $messageCount
+ * @var int $signupCount
+ * @var int $totalSignupCount
+ * @var int $hiredSignupCount
+ * @var int $declinedSignupCount
  */
 ?>
-
-<style>
-    :root {
-        --m3-primary: #6750A4;
-        --m3-primary-container: #EADDFF;
-        --m3-surface: #FFFBFE;
-        --m3-surface-variant: #E7E0EC;
-        --m3-on-primary: #FFFFFF;
-        --m3-on-surface: #1C1B1F;
-        --m3-outline: #79747E;
-        --m3-secondary: #625B71;
-    }
-
-    .dashboard-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 3rem 0;
-        color: white;
-        margin-bottom: 3rem;
-        border-radius: 0 0 24px 24px;
-    }
-
-    .dashboard-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-
-    .dashboard-subtitle {
-        font-size: 1.1rem;
-        opacity: 0.95;
-    }
-
-    .stat-card {
-        background: white;
-        border-radius: 20px;
-        padding: 1.5rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        transition: all 0.3s ease;
-        border: 1px solid var(--m3-surface-variant);
-        height: 100%;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    }
-
-    .stat-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        color: white;
-        margin-bottom: 1rem;
-    }
-
-    .stat-icon.primary {
-        background: linear-gradient(135deg, var(--m3-primary) 0%, #764ba2 100%);
-    }
-
-    .stat-icon.success {
-        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-    }
-
-    .stat-icon.warning {
-        background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
-    }
-
-    .stat-icon.info {
-        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-    }
-
-    .stat-value {
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--m3-on-surface);
-        margin-bottom: 0.25rem;
-    }
-
-    .stat-label {
-        color: var(--m3-outline);
-        font-size: 0.9rem;
-        font-weight: 500;
-    }
-
-    .section-card {
-        background: white;
-        border-radius: 24px;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        margin-bottom: 2rem;
-        border: 1px solid var(--m3-surface-variant);
-    }
-
-    .section-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--m3-on-surface);
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .section-title i {
-        color: var(--m3-primary);
-        font-size: 1.75rem;
-    }
-
-    .table-modern {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-    }
-
-    .table-modern thead {
-        background: var(--m3-primary-container);
-    }
-
-    .table-modern th {
-        padding: 1rem;
-        text-align: left;
-        font-weight: 600;
-        color: var(--m3-on-surface);
-        border-bottom: 2px solid var(--m3-surface-variant);
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .table-modern td {
-        padding: 1rem;
-        border-bottom: 1px solid var(--m3-surface-variant);
-        color: var(--m3-on-surface);
-    }
-
-    .table-modern tbody tr {
-        transition: background 0.2s ease;
-    }
-
-    .table-modern tbody tr:hover {
-        background: var(--m3-primary-container);
-    }
-
-    .table-modern tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-    .rank-badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        font-weight: 700;
-        font-size: 0.9rem;
-        margin-right: 1rem;
-    }
-
-    .rank-badge.gold {
-        background: linear-gradient(135deg, #FCD34D 0%, #FBBF24 100%);
-        color: #92400E;
-    }
-
-    .rank-badge.silver {
-        background: linear-gradient(135deg, #E5E7EB 0%, #D1D5DB 100%);
-        color: #374151;
-    }
-
-    .rank-badge.bronze {
-        background: linear-gradient(135deg, #FCA5A5 0%, #F87171 100%);
-        color: #991B1B;
-    }
-
-    .rank-badge.default {
-        background: var(--m3-surface-variant);
-        color: var(--m3-on-surface);
-    }
-
-    .skill-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 1rem;
-        background: var(--m3-surface-variant);
-        border-radius: 12px;
-        margin-bottom: 0.75rem;
-        transition: all 0.3s ease;
-    }
-
-    .skill-item:hover {
-        background: var(--m3-primary-container);
-        transform: translateX(4px);
-    }
-
-    .skill-item:last-child {
-        margin-bottom: 0;
-    }
-
-    .skill-name {
-        font-weight: 500;
-        color: var(--m3-on-surface);
-    }
-
-    .skill-count {
-        background: var(--m3-primary);
-        color: white;
-        padding: 0.375rem 0.75rem;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
-
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: 12px;
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
-
-    .status-badge.preparing {
-        background: #FEF3C7;
-        color: #92400E;
-    }
-
-    .status-badge.ready {
-        background: #D1FAE5;
-        color: #065F46;
-    }
-
-    .status-badge.archive {
-        background: #E0E7FF;
-        color: #3730A3;
-    }
-
-    .status-badge.failed {
-        background: #FEE2E2;
-        color: #991B1B;
-    }
-
-    .chart-bar {
-        height: 8px;
-        background: var(--m3-surface-variant);
-        border-radius: 4px;
-        overflow: hidden;
-        margin-top: 0.5rem;
-    }
-
-    .chart-bar-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--m3-primary) 0%, #764ba2 100%);
-        border-radius: 4px;
-        transition: width 0.5s ease;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 3rem 1rem;
-        color: var(--m3-outline);
-    }
-
-    .empty-state i {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        opacity: 0.5;
-    }
-
-    @media (max-width: 768px) {
-        .dashboard-title {
-            font-size: 2rem;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <?= $this->Html->charset() ?>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - CommunityLink</title>
+    
+    <!-- Bootstrap CSS (same version as A3) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons (same as A3) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
         }
-
-        .section-card {
-            padding: 1.5rem;
+        .container-fluid {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
-
-        .table-modern {
-            font-size: 0.85rem;
+        .row {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            align-items: stretch;
         }
-
-        .table-modern th,
-        .table-modern td {
-            padding: 0.75rem 0.5rem;
+        .col-md-3, .col-lg-2 {
+            display: flex;
+            flex-direction: column;
         }
-    }
-</style>
-
-<!-- Dashboard Header -->
-<div class="dashboard-header">
-    <div class="container">
-        <h1 class="dashboard-title">
-            <i class="bi bi-speedometer2 me-3"></i>Dashboard
-        </h1>
-        <p class="dashboard-subtitle">
-            Welcome back, <?= h($user->username) ?>! Here's an overview of your community platform.
-        </p>
-    </div>
-</div>
-
-<div class="container">
-    <!-- Statistics Cards -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-6 col-lg-3">
-            <div class="stat-card">
-                <div class="stat-icon primary">
-                    <i class="bi bi-people-fill"></i>
-                </div>
-                <div class="stat-value"><?= count($topVolunteersList) ?></div>
-                <div class="stat-label">Top Volunteers</div>
-            </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="stat-card">
-                <div class="stat-icon success">
-                    <i class="bi bi-building-fill"></i>
-                </div>
-                <div class="stat-value"><?= count($topPartnersList) ?></div>
-                <div class="stat-label">Top Partners</div>
-            </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="stat-card">
-                <div class="stat-icon warning">
-                    <i class="bi bi-tools"></i>
-                </div>
-                <div class="stat-value"><?= count($skillsDistribution) ?></div>
-                <div class="stat-label">Skill Categories</div>
-            </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="stat-card">
-                <div class="stat-icon info">
-                    <i class="bi bi-calendar-event"></i>
-                </div>
-                <div class="stat-value"><?= array_sum($eventsByStatus) ?></div>
-                <div class="stat-label">Events Next Month</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- Top 10 Volunteers -->
-        <div class="col-lg-6">
-            <div class="section-card">
-                <h2 class="section-title">
-                    <i class="bi bi-trophy-fill"></i>
-                    Top 10 Volunteers
-                </h2>
-                <?php if (!empty($topVolunteersList)): ?>
-                    <div class="table-responsive">
-                        <table class="table-modern">
-                            <thead>
-                                <tr>
-                                    <th style="width: 60px;">Rank</th>
-                                    <th>Volunteer</th>
-                                    <th style="text-align: center; width: 100px;">Events</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($topVolunteersList as $index => $item): 
-                                    $rank = $index + 1;
-                                    $rankClass = $rank === 1 ? 'gold' : ($rank === 2 ? 'silver' : ($rank === 3 ? 'bronze' : 'default'));
-                                ?>
-                                    <tr>
-                                        <td>
-                                            <span class="rank-badge <?= $rankClass ?>">
-                                                <?= $rank ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <strong><?= h($item['volunteer']->first_name . ' ' . $item['volunteer']->last_name) ?></strong>
-                                            <br>
-                                            <small class="text-muted"><?= h($item['volunteer']->email) ?></small>
-                                        </td>
-                                        <td style="text-align: center;">
-                                            <span class="badge bg-primary" style="font-size: 1rem; padding: 0.5rem 0.75rem;">
-                                                <?= $item['event_count'] ?>
-                                            </span>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+        .sidebar { min-height: 100%; background: #343a40; width: 250px; }
+        .sidebar .nav-link {
+            color: #adb5bd;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            margin: 0.25rem 0;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: #fff;
+            background: #495057;
+        }
+        .sidebar .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+        .col-md-9, .col-lg-10 {
+            display: flex;
+            flex-direction: column;
+        }
+        .main-content {
+            padding: 20px;
+            flex: 1;
+        }
+        .stat-card {
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+        .stat-card .card-body { min-height: 110px; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="sidebar p-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white">
+                            <i class="fas fa-hands-helping me-2"></i>CommunityLink
+                        </h4>
                     </div>
-                <?php else: ?>
-                    <div class="empty-state">
-                        <i class="bi bi-inbox"></i>
-                        <p>No volunteer data available yet.</p>
-                    </div>
-                <?php endif; ?>
+                    
+                    <nav class="nav flex-column">
+                        <a class="nav-link active" href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'dashboard']) ?>">
+                            <i class="fas fa-tachometer-alt"></i>Dashboard
+                        </a>
+                        <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Events', 'action' => 'index']) ?>">
+                            <i class="fas fa-calendar-alt"></i>Events
+                        </a>
+                        <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Volunteers', 'action' => 'index']) ?>">
+                            <i class="fas fa-users"></i>Volunteers
+                        </a>
+                        <a class="nav-link" href="<?= $this->Url->build(['controller' => 'VolunteerSignups', 'action' => 'index']) ?>">
+                            <i class="fas fa-user-plus"></i>Volunteer Signups
+                        </a>
+                        <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Organisations', 'action' => 'index']) ?>">
+                            <i class="fas fa-handshake"></i>Organizations
+                        </a>
+                        <a class="nav-link" href="<?= $this->Url->build(['controller' => 'ContactMessages', 'action' => 'index']) ?>">
+                            <i class="fas fa-envelope"></i>Messages
+                        </a>
+                        <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'index']) ?>">
+                            <i class="fas fa-user-cog"></i>Users
+                        </a>
+                        <hr class="text-muted">
+                        <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'logout']) ?>">
+                            <i class="fas fa-sign-out-alt"></i>Logout
+                        </a>
+                    </nav>
+                </div>
             </div>
-        </div>
-
-        <!-- Top 10 Partners -->
-        <div class="col-lg-6">
-            <div class="section-card">
-                <h2 class="section-title">
-                    <i class="bi bi-award-fill"></i>
-                    Top 10 Partners
-                </h2>
-                <?php if (!empty($topPartnersList)): ?>
-                    <div class="table-responsive">
-                        <table class="table-modern">
-                            <thead>
-                                <tr>
-                                    <th style="width: 60px;">Rank</th>
-                                    <th>Organisation</th>
-                                    <th style="text-align: center; width: 100px;">Events</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($topPartnersList as $index => $item): 
-                                    $rank = $index + 1;
-                                    $rankClass = $rank === 1 ? 'gold' : ($rank === 2 ? 'silver' : ($rank === 3 ? 'bronze' : 'default'));
-                                ?>
-                                    <tr>
-                                        <td>
-                                            <span class="rank-badge <?= $rankClass ?>">
-                                                <?= $rank ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <strong><?= h($item['organisation']->org_name) ?></strong>
-                                            <br>
-                                            <small class="text-muted"><?= h($item['organisation']->industry) ?></small>
-                                        </td>
-                                        <td style="text-align: center;">
-                                            <span class="badge bg-success" style="font-size: 1rem; padding: 0.5rem 0.75rem;">
-                                                <?= $item['event_count'] ?>
-                                            </span>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10">
+                <div class="main-content">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h1>Dashboard</h1>
                     </div>
-                <?php else: ?>
-                    <div class="empty-state">
-                        <i class="bi bi-inbox"></i>
-                        <p>No partner data available yet.</p>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- Skills Distribution -->
-        <div class="col-lg-6">
-            <div class="section-card">
-                <h2 class="section-title">
-                    <i class="bi bi-pie-chart-fill"></i>
-                    Volunteers by Skills
-                </h2>
-                <?php if (!empty($skillsDistribution)): 
-                    $maxCount = max($skillsDistribution);
-                ?>
-                    <div>
-                        <?php foreach ($skillsDistribution as $skill => $count): 
-                            $percentage = ($count / $maxCount) * 100;
-                        ?>
-                            <div class="skill-item">
-                                <div>
-                                    <div class="skill-name"><?= h($skill) ?></div>
-                                    <div class="chart-bar">
-                                        <div class="chart-bar-fill" style="width: <?= $percentage ?>%"></div>
+                    
+                    <!-- Statistics Cards (A3 exact layout) -->
+                    <div class="stats-grid mb-4">
+                        <a href="<?= $this->Url->build(['controller' => 'Events', 'action' => 'index']) ?>" class="text-decoration-none">
+                        <div class="card stat-card bg-primary text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title"><?= $eventCount ?></h4>
+                                        <p class="card-text">Total Events</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-calendar-alt fa-2x"></i>
                                     </div>
                                 </div>
-                                <span class="skill-count"><?= $count ?></span>
                             </div>
-                        <?php endforeach; ?>
-                    </div>
-                <?php else: ?>
-                    <div class="empty-state">
-                        <i class="bi bi-inbox"></i>
-                        <p>No skills data available yet.</p>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <!-- Events by Status (Next Month) -->
-        <div class="col-lg-6">
-            <div class="section-card">
-                <h2 class="section-title">
-                    <i class="bi bi-calendar-month-fill"></i>
-                    Events Next Month (by Status)
-                </h2>
-                <?php if (array_sum($eventsByStatus) > 0): ?>
-                    <div>
-                        <?php 
-                        $statusConfig = [
-                            'Preparing' => ['class' => 'preparing', 'icon' => 'bi-hourglass-split', 'label' => 'Preparing'],
-                            'Ready to go' => ['class' => 'ready', 'icon' => 'bi-check-circle', 'label' => 'Ready to go'],
-                            'Archive' => ['class' => 'archive', 'icon' => 'bi-archive', 'label' => 'Archive'],
-                            'Failed' => ['class' => 'failed', 'icon' => 'bi-x-circle', 'label' => 'Failed']
-                        ];
-                        foreach ($eventsByStatus as $status => $count): 
-                            if ($count > 0):
-                                $config = $statusConfig[$status] ?? ['class' => 'default', 'icon' => 'bi-circle', 'label' => $status];
-                        ?>
-                            <div class="skill-item">
-                                <div>
-                                    <div class="skill-name">
-                                        <span class="status-badge <?= $config['class'] ?>">
-                                            <i class="bi <?= $config['icon'] ?>"></i>
-                                            <?= h($config['label']) ?>
-                                        </span>
+                        </div>
+                        </a>
+                        <a href="<?= $this->Url->build(['controller' => 'Volunteers', 'action' => 'index']) ?>" class="text-decoration-none">
+                        <div class="card stat-card bg-success text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title"><?= $volunteerCount ?></h4>
+                                        <p class="card-text">Total Volunteers</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-users fa-2x"></i>
                                     </div>
                                 </div>
-                                <span class="skill-count"><?= $count ?></span>
                             </div>
-                        <?php 
-                            endif;
-                        endforeach; 
-                        ?>
+                        </div>
+                        </a>
+                        <a href="<?= $this->Url->build(['controller' => 'Organisations', 'action' => 'index']) ?>" class="text-decoration-none">
+                        <div class="card stat-card bg-info text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title"><?= $orgCount ?></h4>
+                                        <p class="card-text">Organizations</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-handshake fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </a>
+                        <a href="<?= $this->Url->build(['controller' => 'ContactMessages', 'action' => 'index']) ?>" class="text-decoration-none">
+                        <div class="card stat-card bg-warning text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title"><?= $messageCount ?></h4>
+                                        <p class="card-text">Unread Messages</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-envelope fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </a>
+                        <a href="<?= $this->Url->build(['controller' => 'VolunteerSignups', 'action' => 'index']) ?>" class="text-decoration-none">
+                        <div class="card stat-card bg-primary text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title"><?= $totalSignupCount ?></h4>
+                                        <p class="card-text">Total Signups</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-clipboard-list fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </a>
+                        <div class="card stat-card bg-warning text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title"><?= $signupCount ?></h4>
+                                        <p class="card-text">Pending Signups</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-user-plus fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card stat-card bg-success text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title"><?= $hiredSignupCount ?></h4>
+                                        <p class="card-text">Hired Signups</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-user-check fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card stat-card bg-danger text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title"><?= $declinedSignupCount ?></h4>
+                                        <p class="card-text">Declined Signups</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-user-times fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                <?php else: ?>
-                    <div class="empty-state">
-                        <i class="bi bi-calendar-x"></i>
-                        <p>No events scheduled for next month.</p>
+                    
+                    <!-- A5 Requirement: Top 10 Most Active Volunteers -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Top 10 Most Active Volunteers (Current Year)</h5>
+                                </div>
+                                <div class="card-body">
+                                    <?php if (!empty($topVolunteers)): ?>
+                                        <div class="list-group list-group-flush">
+                                            <?php foreach ($topVolunteers as $item): ?>
+                                                <?php $volunteer = $item['volunteer']; ?>
+                                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <strong><?= h($volunteer->first_name . ' ' . $volunteer->last_name) ?></strong>
+                                                        <br><small class="text-muted"><?= h($volunteer->email) ?></small>
+                                                    </div>
+                                                    <span class="badge bg-primary rounded-pill"><?= h($item['event_count']) ?> events</span>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <p class="text-muted">No volunteer activity data available for this year.</p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- A5 Requirement: Top 10 Most Active Organisations -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-building me-2"></i>Top 10 Most Active Organisations (Current Year)</h5>
+                                </div>
+                                <div class="card-body">
+                                    <?php if (!empty($topOrganisations)): ?>
+                                        <div class="list-group list-group-flush">
+                                            <?php foreach ($topOrganisations as $item): ?>
+                                                <?php $org = $item['organisation']; ?>
+                                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <strong><?= h($org->org_name) ?></strong>
+                                                        <br><small class="text-muted"><?= h($org->email) ?></small>
+                                                    </div>
+                                                    <span class="badge bg-success rounded-pill"><?= h($item['event_count']) ?> events</span>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <p class="text-muted">No organisation activity data available for this year.</p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                <?php endif; ?>
+
+                    <!-- A5 Requirement: Volunteer Skills Distribution -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Volunteer Skills Distribution (Top 10)</h5>
+                                </div>
+                                <div class="card-body">
+                                    <?php if (!empty($skillsStats)): ?>
+                                        <div class="list-group list-group-flush">
+                                            <?php foreach ($skillsStats as $skill => $count): ?>
+                                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <span><?= h($skill) ?></span>
+                                                    <span class="badge bg-info rounded-pill"><?= h($count) ?> volunteer<?= $count != 1 ? 's' : '' ?></span>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <p class="text-muted">No skills data available.</p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- A5 Requirement: Events in Coming Month by Status -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Events in Coming Month by Status</h5>
+                                </div>
+                                <div class="card-body">
+                                    <?php if (!empty($eventsNextMonth)): ?>
+                                        <div class="list-group list-group-flush">
+                                            <?php 
+                                            $statusLabels = [
+                                                'Preparing' => 'warning',
+                                                'Ready to go' => 'success',
+                                                'Archive' => 'secondary',
+                                                'Failed' => 'danger'
+                                            ];
+                                            foreach ($eventsNextMonth as $eventStat): 
+                                                $statusClass = $statusLabels[$eventStat->status] ?? 'light';
+                                            ?>
+                                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <span class="badge bg-<?= $statusClass ?>"><?= h($eventStat->status) ?></span>
+                                                    <span class="badge bg-primary rounded-pill"><?= h($eventStat->count ?? 0) ?> event<?= ($eventStat->count ?? 0) != 1 ? 's' : '' ?></span>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <p class="text-muted">No events scheduled.</p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions (A3) -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Quick Actions</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-grid gap-2">
+                                        <?= $this->Html->link('<i class="fas fa-plus me-2"></i>Add New Event', ['controller' => 'Events', 'action' => 'add'], ['class' => 'btn btn-primary', 'escape' => false]) ?>
+                                        <?= $this->Html->link('<i class="fas fa-user-plus me-2"></i>Add New Volunteer', ['controller' => 'Volunteers', 'action' => 'add'], ['class' => 'btn btn-success', 'escape' => false]) ?>
+                                        <?= $this->Html->link('<i class="fas fa-building me-2"></i>Add New Organization', ['controller' => 'Organisations', 'action' => 'add'], ['class' => 'btn btn-info', 'escape' => false]) ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

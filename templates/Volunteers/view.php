@@ -1,443 +1,253 @@
 <?php
 /**
+ * View Volunteer page for CommunityLink - A5 CakePHP version
+ * Based on A3 volunteers.php view, adapted for CakePHP with same Bootstrap styling
+ * 
  * @var \App\View\AppView $this
  * @var \App\Model\Entity\Volunteer $volunteer
  */
 ?>
-
-<style>
-    :root {
-        --m3-primary: #6750A4;
-        --m3-primary-container: #EADDFF;
-        --m3-surface: #FFFBFE;
-        --m3-surface-variant: #E7E0EC;
-        --m3-on-surface: #1C1B1F;
-        --m3-outline: #79747E;
-    }
-
-    .page-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 2.5rem 0;
-        color: white;
-        margin-bottom: 2rem;
-        border-radius: 0 0 24px 24px;
-    }
-
-    .page-title {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .page-title i {
-        font-size: 2.25rem;
-    }
-
-    .page-subtitle {
-        font-size: 1rem;
-        opacity: 0.95;
-    }
-
-    .action-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-
-    .btn-action {
-        padding: 0.75rem 1.5rem;
-        border-radius: 12px;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-        border: none;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, var(--m3-primary) 0%, #764ba2 100%);
-        color: white;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        color: white;
-    }
-
-    .btn-outline {
-        background: white;
-        color: var(--m3-primary);
-        border: 2px solid var(--m3-primary);
-    }
-
-    .btn-outline:hover {
-        background: var(--m3-primary-container);
-        color: var(--m3-primary);
-    }
-
-    .btn-danger {
-        background: #DC2626;
-        color: white;
-    }
-
-    .btn-danger:hover {
-        background: #991B1B;
-        color: white;
-        transform: translateY(-2px);
-    }
-
-    .info-card {
-        background: white;
-        border-radius: 20px;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        margin-bottom: 1.5rem;
-        border: 1px solid var(--m3-surface-variant);
-    }
-
-    .card-header {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid var(--m3-surface-variant);
-    }
-
-    .user-avatar-large {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 32px;
-        font-weight: 700;
-        flex-shrink: 0;
-    }
-
-    .user-info-header {
-        flex: 1;
-    }
-
-    .user-name-large {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: var(--m3-on-surface);
-        margin-bottom: 0.5rem;
-    }
-
-    .user-email-large {
-        font-size: 1rem;
-        color: var(--m3-outline);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .info-item {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .info-label {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: var(--m3-outline);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .info-value {
-        font-size: 1rem;
-        color: var(--m3-on-surface);
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .info-value i {
-        color: var(--m3-primary);
-    }
-
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: 12px;
-        font-weight: 600;
-        font-size: 0.875rem;
-    }
-
-    .status-badge.pending {
-        background: #FEF3C7;
-        color: #92400E;
-    }
-
-    .status-badge.approved {
-        background: #D1FAE5;
-        color: #065F46;
-    }
-
-    .status-badge.rejected {
-        background: #FEE2E2;
-        color: #991B1B;
-    }
-
-    .status-badge.default {
-        background: var(--m3-surface-variant);
-        color: var(--m3-on-surface);
-    }
-
-    .content-section {
-        margin-top: 1.5rem;
-    }
-
-    .section-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--m3-on-surface);
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .section-title i {
-        color: var(--m3-primary);
-        font-size: 1.5rem;
-    }
-
-    .section-content {
-        background: var(--m3-surface-variant);
-        padding: 1.5rem;
-        border-radius: 16px;
-        color: var(--m3-on-surface);
-        line-height: 1.6;
-        white-space: pre-wrap;
-    }
-
-    .empty-content {
-        color: var(--m3-outline);
-        font-style: italic;
-    }
-
-    @media (max-width: 768px) {
-        .info-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .action-bar {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <?= $this->Html->charset() ?>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Volunteer - CommunityLink</title>
+    
+    <!-- Bootstrap CSS (same version as A3) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons (same as A3) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        html, body { height: 100%; margin: 0; }
+        .container-fluid { height: 100%; display: flex; flex-direction: column; }
+        .row { display: flex; flex: 1; min-height: 0; align-items: stretch; }
+        .col-md-3, .col-lg-2 { display: flex; flex-direction: column; }
+        .sidebar {
+            background: #343a40;
+            width: 250px;
+            display: flex;
             flex-direction: column;
+            min-height: 100%;
         }
-
-        .btn-action {
-            width: 100%;
-            justify-content: center;
+        .sidebar .nav-link {
+            color: #adb5bd;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            margin: 0.25rem 0;
         }
-    }
-</style>
-
-<!-- Page Header -->
-<div class="page-header">
-    <div class="container">
-        <h1 class="page-title">
-            <i class="bi bi-person-circle"></i>
-            Volunteer Details
-        </h1>
-        <p class="page-subtitle">View complete information about this volunteer</p>
-    </div>
-</div>
-
-<div class="container">
-    <!-- Action Bar -->
-    <div class="action-bar">
-        <div></div>
-        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-            <?= $this->Html->link(
-                '<i class="bi bi-arrow-left"></i> Back to List',
-                ['action' => 'index'],
-                ['class' => 'btn-action btn-outline', 'escape' => false]
-            ) ?>
-            <?= $this->Html->link(
-                '<i class="bi bi-pencil"></i> Edit',
-                ['action' => 'edit', $volunteer->id],
-                ['class' => 'btn-action btn-primary', 'escape' => false]
-            ) ?>
-            <?= $this->Form->postLink(
-                '<i class="bi bi-trash"></i> Delete',
-                ['action' => 'delete', $volunteer->id],
-                [
-                    'class' => 'btn-action btn-danger',
-                    'confirm' => __('Are you sure you want to delete volunteer {0}?', $volunteer->first_name . ' ' . $volunteer->last_name),
-                    'escape' => false
-                ]
-            ) ?>
-        </div>
-    </div>
-
-    <!-- Main Info Card -->
-    <div class="info-card">
-        <div class="card-header">
-            <?php
-            $initials = strtoupper(substr($volunteer->first_name ?? '', 0, 1) . substr($volunteer->last_name ?? '', 0, 1));
-            $status = strtolower($volunteer->status ?? 'inactive');
-            $statusClass = match($status) {
-                'active' => 'approved',
-                'inactive' => 'pending',
-                default => 'pending'
-            };
-            ?>
-            <div class="user-avatar-large">
-                <?= $initials ?: '?' ?>
-            </div>
-            <div class="user-info-header">
-                <div class="user-name-large">
-                    <?= h($volunteer->first_name . ' ' . $volunteer->last_name) ?>
-                </div>
-                <div class="user-email-large">
-                    <i class="bi bi-envelope"></i>
-                    <?= h($volunteer->email) ?>
-                </div>
-            </div>
-            <div>
-                <span class="status-badge <?= $statusClass ?>">
-                    <?php if ($statusClass === 'approved'): ?>
-                        <i class="bi bi-check-circle"></i>
-                    <?php else: ?>
-                        <i class="bi bi-clock"></i>
-                    <?php endif; ?>
-                    <?= h(ucfirst($volunteer->status ?? 'Inactive')) ?>
-                </span>
-            </div>
-        </div>
-
-        <!-- Contact Information -->
-        <div class="info-grid">
-            <div class="info-item">
-                <div class="info-label">Phone</div>
-                <div class="info-value">
-                    <i class="bi bi-telephone"></i>
-                    <?= h($volunteer->phone) ?>
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Submitted</div>
-                <div class="info-value">
-                    <i class="bi bi-calendar3"></i>
-                    <?= $volunteer->date_submitted ? $volunteer->date_submitted->format('F d, Y \a\t g:i A') : ($volunteer->created ? $volunteer->created->format('F d, Y \a\t g:i A') : '-') ?>
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Last Modified</div>
-                <div class="info-value">
-                    <i class="bi bi-clock-history"></i>
-                    <?= $volunteer->modified ? $volunteer->modified->format('F d, Y \a\t g:i A') : '-' ?>
-                </div>
-            </div>
-        </div>
-
-        <!-- Profile Picture -->
-        <?php if ($volunteer->profile_picture): ?>
-            <div class="info-item" style="margin-top: 1rem;">
-                <div class="info-label">Profile Picture</div>
-                <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--m3-primary-container); border-radius: 12px; margin-top: 0.5rem;">
-                    <i class="bi bi-image" style="font-size: 2rem; color: var(--m3-primary);"></i>
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600; color: var(--m3-on-surface); margin-bottom: 0.25rem;">Profile Picture</div>
-                        <?= $this->Html->link(
-                            'View/Download',
-                            '/' . h($volunteer->profile_picture),
-                            ['style' => 'color: var(--m3-primary); text-decoration: none; font-size: 0.875rem;', 'target' => '_blank']
-                        ) ?>
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: #fff;
+            background: #495057;
+        }
+        .sidebar .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+        .main-content {
+            padding: 20px;
+        }
+        .profile-picture {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+<div class="row">
+            <!-- Sidebar (inline, no element) -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="sidebar p-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white">
+                            <i class="fas fa-hands-helping me-2"></i>CommunityLink
+                        </h4>
                     </div>
-                </div>
+                    <nav class="nav flex-column">
+                        <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'dashboard']) ?>">
+                            <i class="fas fa-tachometer-alt"></i>Dashboard
+                        </a>
+                        <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Events', 'action' => 'index']) ?>">
+                            <i class="fas fa-calendar-alt"></i>Events
+                        </a>
+                        <a class="nav-link active" href="<?= $this->Url->build(['controller' => 'Volunteers', 'action' => 'index']) ?>">
+                            <i class="fas fa-users"></i>Volunteers
+                        </a>
+                        <a class="nav-link" href="<?= $this->Url->build(['controller' => 'VolunteerSignups', 'action' => 'index']) ?>">
+                            <i class="fas fa-user-plus"></i>Volunteer Signups
+                        </a>
+                        <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Organisations', 'action' => 'index']) ?>">
+                            <i class="fas fa-handshake"></i>Organizations
+                        </a>
+                    <a class="nav-link" href="<?= $this->Url->build(['controller' => 'ContactMessages', 'action' => 'index']) ?>">
+                        <i class="fas fa-envelope"></i>Messages
+                    </a>
+                    <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'index']) ?>">
+                        <i class="fas fa-user-cog"></i>Users
+                    </a>
+                        <hr class="text-muted">
+                        <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'logout']) ?>">
+                            <i class="fas fa-sign-out-alt"></i>Logout
+                        </a>
+                    </nav>
+        </div>
             </div>
-        <?php endif; ?>
-
-        <!-- Documents -->
-        <?php if ($volunteer->documents): ?>
-            <div class="info-item" style="margin-top: 1rem;">
-                <div class="info-label">Documents</div>
-                <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--m3-primary-container); border-radius: 12px; margin-top: 0.5rem;">
-                    <i class="bi bi-file-earmark-text" style="font-size: 2rem; color: var(--m3-primary);"></i>
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600; color: var(--m3-on-surface); margin-bottom: 0.25rem;">Attached Documents</div>
-                        <?= $this->Html->link(
-                            'View/Download',
-                            '/' . h($volunteer->documents),
-                            ['style' => 'color: var(--m3-primary); text-decoration: none; font-size: 0.875rem;', 'target' => '_blank']
-                        ) ?>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10">
+                <div class="main-content">
+                    <div class="mb-3">
+                        <h1><?= h($volunteer->first_name . ' ' . $volunteer->last_name) ?></h1>
                     </div>
-                </div>
+                    
+                    <?= $this->Flash->render() ?>
+                    
+                    <!-- View Volunteer Details (Events page layout) -->
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Volunteer Details</h5>
+                            <div>
+                                <?= $this->Html->link('<i class="fas fa-edit me-2"></i>Edit', ['action' => 'edit', $volunteer->id], ['class' => 'btn btn-warning', 'escape' => false]) ?>
+                                <a href="<?= $this->Url->build(['action' => 'index']) ?>" class="btn btn-secondary">Back to List</a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <h3 class="mb-0 me-3"><?= h($volunteer->first_name . ' ' . $volunteer->last_name) ?></h3>
+                                        <?php
+                                        $statusColors = [
+                                            'active' => 'success',
+                                            'inactive' => 'secondary',
+                                            'hired' => 'primary'
+                                        ];
+                                        $statusColor = $statusColors[$volunteer->status] ?? 'secondary';
+                                        ?>
+                                        <span class="badge bg-<?= $statusColor ?> fs-6"><?= h(ucfirst($volunteer->status ?? 'inactive')) ?></span>
+                                    </div>
+                                    
+                                    <!-- Basic Information -->
+                                    <div class="mb-4">
+                                        <h5 class="mb-3">Basic Information</h5>
+                                        <p class="text-muted mb-2">
+                                            <i class="fas fa-envelope me-2"></i><strong>Email:</strong> <a href="mailto:<?= h($volunteer->email) ?>"><?= h($volunteer->email) ?></a>
+                                        </p>
+                                        <p class="text-muted mb-2">
+                                            <i class="fas fa-phone me-2"></i><strong>Phone:</strong> <?= h($volunteer->phone) ?>
+                                        </p>
+                                        <?php if ($volunteer->date_submitted): ?>
+                                            <p class="text-muted mb-2">
+                                                <i class="fas fa-calendar me-2"></i><strong>Date Submitted:</strong> <?= h($volunteer->date_submitted->format('M j, Y')) ?>
+                                            </p>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                    <!-- Skills -->
+                                    <?php if (!empty($volunteer->skills)): ?>
+                                        <div class="mb-4">
+                                            <h5 class="mb-3">Skills</h5>
+                                            <p><?= nl2br(h($volunteer->skills)) ?></p>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <!-- Availability -->
+                                    <?php if (!empty($volunteer->availability)): ?>
+                                        <div class="mb-4">
+                                            <h5 class="mb-3">Availability</h5>
+                                            <p><?= nl2br(h($volunteer->availability)) ?></p>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <!-- Self Introduction -->
+                                    <?php if (!empty($volunteer->self_intro)): ?>
+                                        <div class="mb-4">
+                                            <h5 class="mb-3">Self Introduction</h5>
+                                            <p><?= nl2br(h($volunteer->self_intro)) ?></p>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <!-- Documents -->
+                                    <?php if (!empty($volunteer->documents)): ?>
+                                        <div class="mb-4">
+                                            <h5 class="mb-3">Official Documents</h5>
+                                            <a href="<?= $this->Url->build('/volunteer_documents/' . $volunteer->documents) ?>" 
+                                               target="_blank" 
+                                               class="btn btn-primary">
+                                                <i class="fas fa-file-pdf me-2"></i>View Documents (PDF)
+                                            </a>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card mb-4">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Profile Picture</h6>
+                                        </div>
+                                        <div class="card-body text-center">
+                                            <?php
+                                            // Handle both cases: with or without 'volunteer_profiles/' prefix
+                                            $profileFilename = $volunteer->profile_picture ?? '';
+                                            if ($profileFilename) {
+                                                // Remove 'volunteer_profiles/' prefix if present
+                                                $profileFilename = str_replace('volunteer_profiles/', '', $profileFilename);
+                                                $profileFilename = str_replace('img/volunteer_profiles/', '', $profileFilename);
+                                            }
+                                            $profilePath = WWW_ROOT . 'img' . DS . 'volunteer_profiles' . DS . $profileFilename;
+                                            if ($profileFilename && file_exists($profilePath)):
+                                            ?>
+                                                <img src="<?= $this->Url->build('/img/volunteer_profiles/' . $profileFilename) ?>" 
+                                                     class="profile-picture" alt="Profile Picture">
+                                            <?php else: ?>
+                                                <div class="profile-picture bg-secondary d-flex align-items-center justify-content-center mx-auto">
+                                                    <i class="fas fa-user fa-3x text-white"></i>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- A5 Requirement: Show related events -->
+                                    <?php if (!empty($events)): ?>
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">Participated Events (<?= count($events) ?>)</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <ul class="list-unstyled">
+                                                    <?php foreach ($events as $event): ?>
+                                                        <li class="mb-2">
+                                                            <i class="fas fa-calendar me-2"></i>
+                                                            <strong><?= h($event->title) ?></strong>
+                                                            <br><small class="text-muted">
+                                                                <?= $event->event_date ? h($event->event_date->format('M j, Y')) : 'N/A' ?>
+                                                                - <?= h($event->location) ?>
+                                                            </small>
+                                                            <div class="mt-1">
+                                                                <a href="<?= $this->Url->build(['controller' => 'Events', 'action' => 'view', $event->id]) ?>" class="btn btn-sm btn-outline-primary">
+                                                                    <i class="fas fa-eye"></i> View
+                                                                </a>
+                                                            </div>
+                                                        </li>
+                                                    <?php endforeach; ?>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
             </div>
-        <?php endif; ?>
+            </div>
+        </div>
     </div>
 
-    <!-- Skills Section -->
-    <?php if ($volunteer->skills): ?>
-        <div class="info-card">
-            <div class="content-section">
-                <h3 class="section-title">
-                    <i class="bi bi-tools"></i>
-                    Skills & Expertise
-                </h3>
-                <div class="section-content">
-                    <?= $this->Text->autoParagraph(h($volunteer->skills)); ?>
-                </div>
-            </div>
-        </div>
-    <?php endif; ?>
-
-    <!-- Availability Section -->
-    <?php if ($volunteer->availability): ?>
-        <div class="info-card">
-            <div class="content-section">
-                <h3 class="section-title">
-                    <i class="bi bi-calendar-check"></i>
-                    Availability
-                </h3>
-                <div class="section-content">
-                    <?= $this->Text->autoParagraph(h($volunteer->availability)); ?>
-                </div>
-            </div>
-        </div>
-    <?php endif; ?>
-
-    <!-- Self Introduction Section -->
-    <?php if ($volunteer->self_intro): ?>
-        <div class="info-card">
-            <div class="content-section">
-                <h3 class="section-title">
-                    <i class="bi bi-chat-left-text"></i>
-                    Self Introduction
-                </h3>
-                <div class="section-content">
-                    <?= $this->Text->autoParagraph(h($volunteer->self_intro)); ?>
-                </div>
-            </div>
-        </div>
-    <?php endif; ?>
-</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

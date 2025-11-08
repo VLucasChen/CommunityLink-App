@@ -1,499 +1,268 @@
 <?php
 /**
+ * View Event page for CommunityLink - A5 CakePHP version
+ * Based on A3 events.php view, adapted for CakePHP with same Bootstrap styling
+ * 
  * @var \App\View\AppView $this
  * @var \App\Model\Entity\Event $event
+ * @var array $assignedVolunteerIds
+ * @var array $volunteers
  */
 ?>
-
-<style>
-    :root {
-        --m3-primary: #6750A4;
-        --m3-primary-container: #EADDFF;
-        --m3-surface: #FFFBFE;
-        --m3-surface-variant: #E7E0EC;
-        --m3-on-surface: #1C1B1F;
-        --m3-outline: #79747E;
-    }
-
-    .page-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 2.5rem 0;
-        color: white;
-        margin-bottom: 2rem;
-        border-radius: 0 0 24px 24px;
-    }
-
-    .page-title {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .page-title i {
-        font-size: 2.25rem;
-    }
-
-    .page-subtitle {
-        font-size: 1rem;
-        opacity: 0.95;
-    }
-
-    .action-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-
-    .btn-action {
-        padding: 0.75rem 1.5rem;
-        border-radius: 12px;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-        border: none;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, var(--m3-primary) 0%, #764ba2 100%);
-        color: white;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        color: white;
-    }
-
-    .btn-outline {
-        background: white;
-        color: var(--m3-primary);
-        border: 2px solid var(--m3-primary);
-    }
-
-    .btn-outline:hover {
-        background: var(--m3-primary-container);
-        color: var(--m3-primary);
-    }
-
-    .btn-danger {
-        background: #DC2626;
-        color: white;
-    }
-
-    .btn-danger:hover {
-        background: #991B1B;
-        color: white;
-        transform: translateY(-2px);
-    }
-
-    .info-card {
-        background: white;
-        border-radius: 20px;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        margin-bottom: 1.5rem;
-        border: 1px solid var(--m3-surface-variant);
-    }
-
-    .card-header {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid var(--m3-surface-variant);
-    }
-
-    .event-icon-large {
-        width: 80px;
-        height: 80px;
-        border-radius: 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 32px;
-        flex-shrink: 0;
-    }
-
-    .event-info-header {
-        flex: 1;
-    }
-
-    .event-title-large {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: var(--m3-on-surface);
-        margin-bottom: 0.5rem;
-    }
-
-    .event-host-large {
-        font-size: 1rem;
-        color: var(--m3-outline);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .info-item {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .info-label {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: var(--m3-outline);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .info-value {
-        font-size: 1rem;
-        color: var(--m3-on-surface);
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .info-value i {
-        color: var(--m3-primary);
-    }
-
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: 12px;
-        font-weight: 600;
-        font-size: 0.875rem;
-    }
-
-    .status-badge.preparing {
-        background: #FEF3C7;
-        color: #92400E;
-    }
-
-    .status-badge.ready {
-        background: #D1FAE5;
-        color: #065F46;
-    }
-
-    .status-badge.ready-to-go {
-        background: #D1FAE5;
-        color: #065F46;
-    }
-
-    .status-badge.archive {
-        background: var(--m3-surface-variant);
-        color: var(--m3-on-surface);
-    }
-
-    .status-badge.failed {
-        background: #FEE2E2;
-        color: #991B1B;
-    }
-
-    .status-badge.default {
-        background: var(--m3-surface-variant);
-        color: var(--m3-on-surface);
-    }
-
-    .content-section {
-        margin-top: 1.5rem;
-    }
-
-    .section-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--m3-on-surface);
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .section-title i {
-        color: var(--m3-primary);
-        font-size: 1.5rem;
-    }
-
-    .section-content {
-        background: var(--m3-surface-variant);
-        padding: 1.5rem;
-        border-radius: 16px;
-        color: var(--m3-on-surface);
-        line-height: 1.6;
-        white-space: pre-wrap;
-    }
-
-    .empty-content {
-        color: var(--m3-outline);
-        font-style: italic;
-    }
-
-    .card-header {
-        flex-wrap: wrap;
-    }
-
-    .event-info-header {
-        min-width: 200px;
-    }
-
-    @media (max-width: 768px) {
-        .info-grid {
-            grid-template-columns: 1fr;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <?= $this->Html->charset() ?>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Event - CommunityLink</title>
+    
+    <!-- Bootstrap CSS (same version as A3) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons (same as A3) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
         }
-
-        .action-bar {
+        .container-fluid {
+            height: 100%;
+            display: flex;
             flex-direction: column;
         }
-
-        .btn-action {
-            width: 100%;
-            justify-content: center;
+        .row {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            align-items: stretch;
         }
-
-        .card-header {
+        .col-md-3, .col-lg-2 {
+            display: flex;
             flex-direction: column;
-            align-items: flex-start;
         }
-
-        .event-icon-large {
-            width: 60px;
-            height: 60px;
-            font-size: 24px;
+        .sidebar {
+            background: #343a40;
+            width: 250px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
         }
-
-        .event-title-large {
-            font-size: 1.5rem;
+        .sidebar .nav-link {
+            color: #adb5bd;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            margin: 0.25rem 0;
         }
-
-        .page-title {
-            font-size: 1.5rem;
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: #fff;
+            background: #495057;
         }
-
-        .page-title i {
-            font-size: 1.75rem;
+        .sidebar .nav-link i {
+            width: 20px;
+            margin-right: 10px;
         }
-    }
-</style>
-
-<!-- Page Header -->
-<div class="page-header">
-    <div class="container">
-        <h1 class="page-title">
-            <i class="bi bi-calendar-event-fill"></i>
-            Event Details
-        </h1>
-        <p class="page-subtitle">View complete information about this event</p>
-    </div>
-</div>
-
-<div class="container">
-    <!-- Action Bar -->
-    <div class="action-bar">
-        <div></div>
-        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-            <?= $this->Html->link(
-                '<i class="bi bi-arrow-left"></i> Back to List',
-                ['action' => 'index'],
-                ['class' => 'btn-action btn-outline', 'escape' => false]
-            ) ?>
-            <?= $this->Html->link(
-                '<i class="bi bi-pencil"></i> Edit',
-                ['action' => 'edit', $event->id],
-                ['class' => 'btn-action btn-primary', 'escape' => false]
-            ) ?>
-            <?= $this->Form->postLink(
-                '<i class="bi bi-trash"></i> Delete',
-                ['action' => 'delete', $event->id],
-                [
-                    'class' => 'btn-action btn-danger',
-                    'confirm' => __('Are you sure you want to delete "{0}"?', $event->title),
-                    'escape' => false
-                ]
-            ) ?>
-        </div>
-    </div>
-
-    <!-- Main Info Card -->
-    <div class="info-card">
-        <div class="card-header">
-            <div class="event-icon-large">
-                <i class="bi bi-calendar-event"></i>
-            </div>
-            <div class="event-info-header">
-                <div class="event-title-large">
-                    <?= h($event->title) ?>
-                </div>
-                <?php if ($event->host): ?>
-                    <div class="event-host-large">
-                        <i class="bi bi-person"></i>
-                        Hosted by <?= h($event->host) ?>
+        .col-md-9, .col-lg-10 {
+            display: flex;
+            flex-direction: column;
+        }
+        .main-content {
+            padding: 20px;
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar (inline, no element) -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="sidebar p-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white">
+                            <i class="fas fa-hands-helping me-2"></i>CommunityLink
+                        </h4>
                     </div>
-                <?php endif; ?>
-            </div>
-            <div>
-                <?php
-                    $status = $event->status ?? '';
-                    $statusLower = strtolower($status);
-                    $statusClass = match($statusLower) {
-                        'preparing' => 'preparing',
-                        'ready to go' => 'ready',
-                        'ready-to-go' => 'ready',
-                        'archive' => 'archive',
-                        'failed' => 'failed',
-                        default => 'default'
-                    };
-                ?>
-                <span class="status-badge <?= $statusClass ?>">
-                    <?php if ($statusClass === 'preparing'): ?>
-                        <i class="bi bi-tools"></i>
-                    <?php elseif ($statusClass === 'ready'): ?>
-                        <i class="bi bi-check-circle"></i>
-                    <?php elseif ($statusClass === 'archive'): ?>
-                        <i class="bi bi-archive"></i>
-                    <?php elseif ($statusClass === 'failed'): ?>
-                        <i class="bi bi-x-circle"></i>
-                    <?php else: ?>
-                        <i class="bi bi-circle"></i>
-                    <?php endif; ?>
-                    <?= h($status) ?>
-                </span>
-            </div>
-        </div>
-
-        <!-- Basic Information -->
-        <div class="info-grid">
-            <div class="info-item">
-                <div class="info-label">Location</div>
-                <div class="info-value">
-                    <i class="bi bi-geo-alt"></i>
-                    <?= h($event->location) ?>
+                    <nav class="nav flex-column">
+                        <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'dashboard']) ?>">
+                            <i class="fas fa-tachometer-alt"></i>Dashboard
+                        </a>
+                        <a class="nav-link active" href="<?= $this->Url->build(['controller' => 'Events', 'action' => 'index']) ?>">
+                            <i class="fas fa-calendar-alt"></i>Events
+                        </a>
+                        <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Volunteers', 'action' => 'index']) ?>">
+                            <i class="fas fa-users"></i>Volunteers
+                        </a>
+                        <a class="nav-link" href="<?= $this->Url->build(['controller' => 'VolunteerSignups', 'action' => 'index']) ?>">
+                            <i class="fas fa-user-plus"></i>Volunteer Signups
+                        </a>
+                        <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Organisations', 'action' => 'index']) ?>">
+                            <i class="fas fa-handshake"></i>Organizations
+                        </a>
+                    <a class="nav-link" href="<?= $this->Url->build(['controller' => 'ContactMessages', 'action' => 'index']) ?>">
+                        <i class="fas fa-envelope"></i>Messages
+                    </a>
+                    <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'index']) ?>">
+                        <i class="fas fa-user-cog"></i>Users
+                    </a>
+                        <hr class="text-muted">
+                        <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'logout']) ?>">
+                            <i class="fas fa-sign-out-alt"></i>Logout
+                        </a>
+                    </nav>
                 </div>
             </div>
-            <div class="info-item">
-                <div class="info-label">Event Date</div>
-                <div class="info-value">
-                    <i class="bi bi-calendar3"></i>
-                    <?= $event->event_date ? $event->event_date->format('F d, Y') : '—' ?>
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Expected Attendees</div>
-                <div class="info-value">
-                    <i class="bi bi-people"></i>
-                    <?= h($event->event_size) ?> people
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Crews Needed</div>
-                <div class="info-value">
-                    <i class="bi bi-person-badge"></i>
-                    <?= h($event->number_of_required_crews) ?> crews
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Organisation</div>
-                <div class="info-value">
-                    <i class="bi bi-building"></i>
-                    <?= $event->organisation ? h($event->organisation->org_name) : '—' ?>
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Created</div>
-                <div class="info-value">
-                    <i class="bi bi-clock-history"></i>
-                    <?= $event->created ? $event->created->format('F d, Y \a\t g:i A') : '—' ?>
-                </div>
-            </div>
-        </div>
-
-        <!-- Contact Information -->
-        <?php if ($event->contact_person_full_name || $event->contact_person_email): ?>
-            <div class="info-grid" style="margin-top: 1rem; padding-top: 1.5rem; border-top: 2px solid var(--m3-surface-variant);">
-                <div class="info-item">
-                    <div class="info-label">Contact Person</div>
-                    <div class="info-value">
-                        <i class="bi bi-person-lines-fill"></i>
-                        <?= h($event->contact_person_full_name) ?: '—' ?>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10">
+                <div class="main-content">
+                    <div class="mb-3">
+                        <h1><?= h($event->title) ?></h1>
                     </div>
-                </div>
-                <?php if ($event->contact_person_email): ?>
-                    <div class="info-item">
-                        <div class="info-label">Contact Email</div>
-                        <div class="info-value">
-                            <i class="bi bi-envelope"></i>
-                            <?= h($event->contact_person_email) ?>
+                    
+                    <?= $this->Flash->render() ?>
+                    
+                    <!-- View Event Details (A3 layout) -->
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Event Details</h5>
+                            <div>
+                                <?= $this->Html->link('<i class="fas fa-edit me-2"></i>Edit', ['action' => 'edit', $event->id], ['class' => 'btn btn-warning', 'escape' => false]) ?>
+                                <a href="<?= $this->Url->build(['action' => 'index']) ?>" class="btn btn-secondary">Back to List</a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+<div class="row">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <h3 class="mb-0 me-3"><?= h($event->title) ?></h3>
+                                        <?php
+                                        $status = $event->status ?? 'Preparing';
+                                        $badgeClass = match($status) {
+                                            'Ready to go' => 'bg-success',
+                                            'Preparing' => 'bg-warning',
+                                            'Archive' => 'bg-info',
+                                            'Failed' => 'bg-danger',
+                                            default => 'bg-secondary'
+                                        };
+                                        ?>
+                                        <span class="badge <?= $badgeClass ?> fs-6"><?= h($status) ?></span>
+                                    </div>
+                                    
+                                    <!-- Basic Information -->
+                                    <div class="mb-4">
+                                        <h5 class="mb-3">Basic Information</h5>
+                                        <p class="text-muted mb-2">
+                                            <i class="fas fa-calendar me-2"></i><strong>Event Date:</strong> <?= $event->event_date ? h($event->event_date->format('l, F j, Y')) : 'Not set' ?>
+                                        </p>
+                                        <p class="text-muted mb-2">
+                                            <i class="fas fa-map-marker-alt me-2"></i><strong>Location:</strong> <?= h($event->location ?? 'N/A') ?>
+                                        </p>
+                                        <?php if ($event->has('organisation') && $event->organisation): ?>
+                                            <p class="text-muted mb-2">
+                                                <i class="fas fa-building me-2"></i><strong>Organization:</strong> <?= h($event->organisation->org_name) ?>
+                                            </p>
+                                        <?php endif; ?>
+                                        <?php if (!empty($event->host)): ?>
+                                            <p class="text-muted mb-2">
+                                                <i class="fas fa-user-tie me-2"></i><strong>Host:</strong> <?= h($event->host) ?>
+                                            </p>
+                                        <?php endif; ?>
+                                        <?php if (!empty($event->event_size)): ?>
+                                            <p class="text-muted mb-2">
+                                                <i class="fas fa-users me-2"></i><strong>Event Size:</strong> <?= h($event->event_size) ?> people
+                                            </p>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                    <!-- Contact Information -->
+                                    <?php if (!empty($event->contact_person_full_name) || !empty($event->contact_person_email)): ?>
+                                        <div class="mb-4">
+                                            <h5 class="mb-3">Contact Information</h5>
+                                            <?php if (!empty($event->contact_person_full_name)): ?>
+                                                <p class="text-muted mb-2">
+                                                    <i class="fas fa-user me-2"></i><strong>Contact Person:</strong> <?= h($event->contact_person_full_name) ?>
+                                                </p>
+                                            <?php endif; ?>
+                                            <?php if (!empty($event->contact_person_email)): ?>
+                                                <p class="text-muted mb-2">
+                                                    <i class="fas fa-envelope me-2"></i><strong>Email:</strong> <a href="mailto:<?= h($event->contact_person_email) ?>"><?= h($event->contact_person_email) ?></a>
+                                                </p>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <!-- Description -->
+                                    <?php if (!empty($event->event_description)): ?>
+                                        <div class="mb-4">
+                                            <h5 class="mb-3">Description</h5>
+                                            <p><?= nl2br(h($event->event_description)) ?></p>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <!-- Requirements -->
+                                    <div class="mb-4">
+                                        <h5 class="mb-3">Requirements</h5>
+                                        <?php if (!empty($event->required_equipment)): ?>
+                                            <div class="mb-3">
+                                                <p class="mb-1"><strong><i class="fas fa-tools me-2"></i>Required Equipment:</strong></p>
+                                                <p class="text-muted"><?= nl2br(h($event->required_equipment)) ?></p>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($event->required_skills)): ?>
+                                            <div class="mb-3">
+                                                <p class="mb-1"><strong><i class="fas fa-star me-2"></i>Required Skills:</strong></p>
+                                                <p class="text-muted"><?= nl2br(h($event->required_skills)) ?></p>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($event->number_of_required_crews)): ?>
+                                            <div class="mb-3">
+                                                <p class="mb-1"><strong><i class="fas fa-user-friends me-2"></i>Number of Required Crews:</strong></p>
+                                                <p class="text-muted"><?= h($event->number_of_required_crews) ?></p>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Assigned Volunteers</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <?php if (!empty($assignedVolunteerIds) && !empty($volunteers)): ?>
+                                                <ul class="list-unstyled">
+                                                    <?php foreach ($volunteers as $volunteer): ?>
+                                                        <?php if (in_array($volunteer->id, $assignedVolunteerIds)): ?>
+                                                            <li class="mb-2 d-flex align-items-center justify-content-between">
+                                                                <div>
+                                                                    <i class="fas fa-user me-2"></i>
+                                                                    <?= h($volunteer->first_name . ' ' . $volunteer->last_name) ?>
+                                                                    <span class="badge bg-<?= $volunteer->status === 'active' ? 'success' : ($volunteer->status === 'hired' ? 'primary' : 'secondary'); ?> ms-2">
+                                                                        <?= h(ucfirst($volunteer->status ?? 'inactive')) ?>
+                                                                    </span>
+                                                                </div>
+                                                                <a class="btn btn-sm btn-outline-primary" href="<?= $this->Url->build(['controller' => 'Volunteers', 'action' => 'view', $volunteer->id]) ?>">
+                                                                    <i class="fas fa-eye me-1"></i>View
+                                                                </a>
+                                                            </li>
+                                                        <?php endif; ?>
+                                                    <?php endforeach; ?>
+                                                </ul>
+                                            <?php else: ?>
+                                                <p class="text-muted">No volunteers assigned</p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                <?php endif; ?>
+        </div>
             </div>
-        <?php endif; ?>
+        </div>
     </div>
 
-    <!-- Description Section -->
-    <?php if ($event->event_description): ?>
-        <div class="info-card">
-            <div class="content-section">
-                <h3 class="section-title">
-                    <i class="bi bi-file-text"></i>
-                    Event Description
-                </h3>
-                <div class="section-content">
-                    <?= $this->Text->autoParagraph(h($event->event_description)); ?>
-                </div>
-            </div>
-        </div>
-    <?php endif; ?>
-
-    <!-- Requirements Section -->
-    <?php if ($event->required_equipment || $event->required_skills): ?>
-        <div class="info-card">
-            <div class="content-section">
-                <h3 class="section-title">
-                    <i class="bi bi-list-check"></i>
-                    Requirements
-                </h3>
-                <?php if ($event->required_equipment): ?>
-                    <div style="margin-bottom: 1.5rem;">
-                        <div class="info-label" style="margin-bottom: 0.5rem;">Required Equipment</div>
-                        <div class="section-content">
-                            <?= $this->Text->autoParagraph(h($event->required_equipment)); ?>
-                        </div>
-                    </div>
-                <?php endif; ?>
-                <?php if ($event->required_skills): ?>
-                    <div>
-                        <div class="info-label" style="margin-bottom: 0.5rem;">Required Skills</div>
-                        <div class="section-content">
-                            <?= $this->Text->autoParagraph(h($event->required_skills)); ?>
-                        </div>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-    <?php endif; ?>
-</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

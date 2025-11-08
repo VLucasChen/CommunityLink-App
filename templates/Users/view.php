@@ -1,419 +1,154 @@
 <?php
 /**
+ * View User - A5 admin layout matching Events/Volunteers
  * @var \App\View\AppView $this
  * @var \App\Model\Entity\User $user
  */
 ?>
-
-<style>
-    :root {
-        --m3-primary: #6750A4;
-        --m3-primary-container: #EADDFF;
-        --m3-surface: #FFFBFE;
-        --m3-surface-variant: #E7E0EC;
-        --m3-on-surface: #1C1B1F;
-        --m3-outline: #79747E;
-    }
-
-    .page-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 2.5rem 0;
-        color: white;
-        margin-bottom: 2rem;
-        border-radius: 0 0 24px 24px;
-    }
-
-    .page-title {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .page-title i {
-        font-size: 2.25rem;
-    }
-
-    .page-subtitle {
-        font-size: 1rem;
-        opacity: 0.95;
-    }
-
-    .action-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-
-    .btn-action {
-        padding: 0.75rem 1.5rem;
-        border-radius: 12px;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-        border: none;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, var(--m3-primary) 0%, #764ba2 100%);
-        color: white;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        color: white;
-    }
-
-    .btn-outline {
-        background: white;
-        color: var(--m3-primary);
-        border: 2px solid var(--m3-primary);
-    }
-
-    .btn-outline:hover {
-        background: var(--m3-primary-container);
-        color: var(--m3-primary);
-    }
-
-    .btn-danger {
-        background: #DC2626;
-        color: white;
-    }
-
-    .btn-danger:hover {
-        background: #991B1B;
-        color: white;
-        transform: translateY(-2px);
-    }
-
-    .info-card {
-        background: white;
-        border-radius: 20px;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        margin-bottom: 1.5rem;
-        border: 1px solid var(--m3-surface-variant);
-    }
-
-    .card-header {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid var(--m3-surface-variant);
-        flex-wrap: wrap;
-    }
-
-    .user-avatar-large {
-        width: 80px;
-        height: 80px;
-        border-radius: 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 32px;
-        font-weight: 700;
-        flex-shrink: 0;
-    }
-
-    .user-info-header {
-        flex: 1;
-        min-width: 200px;
-    }
-
-    .user-name-large {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: var(--m3-on-surface);
-        margin-bottom: 0.5rem;
-    }
-
-    .user-email-large {
-        font-size: 1rem;
-        color: var(--m3-outline);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .role-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: 12px;
-        font-weight: 600;
-        font-size: 0.875rem;
-    }
-
-    .role-badge.admin {
-        background: #FEE2E2;
-        color: #991B1B;
-    }
-
-    .role-badge.assistant {
-        background: #DBEAFE;
-        color: #1E40AF;
-    }
-
-    .role-badge.volunteer {
-        background: #D1FAE5;
-        color: #065F46;
-    }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .info-item {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .info-label {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: var(--m3-outline);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .info-value {
-        font-size: 1rem;
-        color: var(--m3-on-surface);
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .info-value i {
-        color: var(--m3-primary);
-    }
-
-    .empty-value {
-        color: var(--m3-outline);
-        font-style: italic;
-    }
-
-    @media (max-width: 768px) {
-        .page-title {
-            font-size: 1.5rem;
-        }
-
-        .page-title i {
-            font-size: 1.75rem;
-        }
-
-        .action-bar {
-            flex-direction: column;
-        }
-
-        .btn-action {
-            width: 100%;
-            justify-content: center;
-        }
-
-        .card-header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .user-avatar-large {
-            width: 60px;
-            height: 60px;
-            font-size: 24px;
-        }
-
-        .user-name-large {
-            font-size: 1.5rem;
-        }
-
-        .info-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
-
-<!-- Page Header -->
-<div class="page-header">
-    <div class="container">
-        <h1 class="page-title">
-            <i class="bi bi-person-fill"></i>
-            User Details
-        </h1>
-        <p class="page-subtitle">View complete information about this user</p>
-    </div>
-</div>
-
-<div class="container">
-    <!-- Action Bar -->
-    <div class="action-bar">
-        <div></div>
-        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-            <?= $this->Html->link(
-                '<i class="bi bi-arrow-left"></i> Back to List',
-                ['action' => 'index'],
-                ['class' => 'btn-action btn-outline', 'escape' => false]
-            ) ?>
-            <?= $this->Html->link(
-                '<i class="bi bi-pencil"></i> Edit',
-                ['action' => 'edit', $user->id],
-                ['class' => 'btn-action btn-primary', 'escape' => false]
-            ) ?>
-            <?php 
-            // Assistant cannot delete admin users
-            $canDelete = true;
-            if (isset($currentUserRole) && strtolower($currentUserRole) === 'assistant' && strtolower($user->role) === 'admin') {
-                $canDelete = false;
-            }
-            ?>
-            <?php if ($canDelete): ?>
-                <?= $this->Form->postLink(
-                    '<i class="bi bi-trash"></i> Delete',
-                    ['action' => 'delete', $user->id],
-                    [
-                        'class' => 'btn-action btn-danger',
-                        'confirm' => __('Are you sure you want to delete user "{0}"?', $user->username),
-                        'escape' => false
-                    ]
-                ) ?>
-            <?php endif; ?>
-        </div>
-    </div>
-
-    <!-- Main Info Card -->
-    <div class="info-card">
-        <div class="card-header">
-            <?php
-            $initials = strtoupper(substr($user->username ?? '', 0, 2));
-            $role = strtolower($user->role ?? 'volunteer');
-            ?>
-            <div class="user-avatar-large">
-                <?= $initials ?: 'U' ?>
-            </div>
-            <div class="user-info-header">
-                <div class="user-name-large">
-                    <?= h($user->username) ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <?= $this->Html->charset() ?>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View User - CommunityLink</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        html, body { height: 100%; margin: 0; }
+        .container-fluid { height: 100%; display: flex; flex-direction: column; }
+        .row { display: flex; flex: 1; min-height: 0; align-items: stretch; }
+        .col-md-3, .col-lg-2 { display: flex; flex-direction: column; }
+        .sidebar { background:#343a40; width:250px; display:flex; flex-direction:column; min-height:100%; }
+        .sidebar .nav-link { color:#adb5bd; padding:0.75rem 1rem; border-radius:0.375rem; margin:0.25rem 0; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { color:#fff; background:#495057; }
+        .sidebar .nav-link i { width:20px; margin-right:10px; }
+        .main-content { padding:20px; flex:1; }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 col-lg-2 px-0">
+            <div class="sidebar p-3">
+                <div class="text-center mb-4">
+                    <h4 class="text-white"><i class="fas fa-hands-helping me-2"></i>CommunityLink</h4>
                 </div>
-                <div class="user-email-large">
-                    <i class="bi bi-key"></i>
-                    ID: <?= h($user->id) ?>
-                </div>
-            </div>
-            <div>
-                <span class="role-badge <?= $role ?>">
-                    <?php if ($role === 'admin'): ?>
-                        <i class="bi bi-shield-check"></i>
-                    <?php elseif ($role === 'assistant'): ?>
-                        <i class="bi bi-person-badge"></i>
-                    <?php else: ?>
-                        <i class="bi bi-person"></i>
-                    <?php endif; ?>
-                    <?= h(ucfirst($user->role)) ?>
-                </span>
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'dashboard']) ?>"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+                    <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Events', 'action' => 'index']) ?>"><i class="fas fa-calendar-alt"></i>Events</a>
+                    <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Volunteers', 'action' => 'index']) ?>"><i class="fas fa-users"></i>Volunteers</a>
+                    <a class="nav-link" href="<?= $this->Url->build(['controller' => 'VolunteerSignups', 'action' => 'index']) ?>"><i class="fas fa-user-plus"></i>Volunteer Signups</a>
+                    <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Organisations', 'action' => 'index']) ?>"><i class="fas fa-handshake"></i>Organizations</a>
+                    <a class="nav-link" href="<?= $this->Url->build(['controller' => 'ContactMessages', 'action' => 'index']) ?>"><i class="fas fa-envelope"></i>Messages</a>
+                    <a class="nav-link active" href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'index']) ?>"><i class="fas fa-user-cog"></i>Users</a>
+                    <hr class="text-muted">
+                    <a class="nav-link" href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'logout']) ?>"><i class="fas fa-sign-out-alt"></i>Logout</a>
+                </nav>
             </div>
         </div>
-
-        <!-- Basic Information -->
-        <div class="info-grid">
-            <div class="info-item">
-                <div class="info-label">Username</div>
-                <div class="info-value">
-                    <i class="bi bi-person"></i>
-                    <?= h($user->username) ?>
+        <div class="col-md-9 col-lg-10">
+            <div class="main-content">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1>Users Management</h1>
                 </div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Role</div>
-                <div class="info-value">
-                    <i class="bi bi-shield-check"></i>
-                    <span class="role-badge <?= $role ?>">
-                        <?php if ($role === 'admin'): ?>
-                            <i class="bi bi-shield-check"></i>
-                        <?php elseif ($role === 'assistant'): ?>
-                            <i class="bi bi-person-badge"></i>
-                        <?php else: ?>
-                            <i class="bi bi-person"></i>
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">User Details</h5>
+                        <div class="d-flex gap-2">
+                            <a href="<?= $this->Url->build(['action' => 'edit', $user->id]) ?>" class="btn btn-warning"><i class="fas fa-edit me-2"></i>Edit</a>
+                            <a href="<?= $this->Url->build(['action' => 'index']) ?>" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Back to List</a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-user me-2 text-dark"></i>
+                                        <div class="fw-semibold text-dark">Username</div>
+                                    </div>
+                                    <div class="mt-1"><?= h($user->username) ?></div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-user-shield me-2 text-dark"></i>
+                                        <div class="fw-semibold text-dark">Role</div>
+                                    </div>
+                                    <?php
+                                        $role = strtolower((string)$user->role);
+                                        $badge = $role === 'admin' ? 'danger' : ($role === 'assistant' ? 'primary' : 'success');
+                                    ?>
+                                    <div class="mt-1"><span class="badge bg-<?= $badge ?>"><?= h(ucfirst($role)) ?></span></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-lock me-2 text-dark"></i>
+                                        <div class="fw-semibold text-dark">Password</div>
+                                    </div>
+                                    <div class="mt-1">•••••••• (Hidden for security)</div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-calendar me-2 text-dark"></i>
+                                        <div class="fw-semibold text-dark">Created Date</div>
+                                    </div>
+                                    <div class="mt-1"><?= $user->created ? h($user->created->format('l, F j, Y \a\t g:i A')) : 'N/A' ?></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <?php if ($user->has('volunteer') && $user->volunteer): ?>
+                            <?php
+                                $pic = (string)($user->volunteer->profile_picture ?? '');
+                                $picFile = str_starts_with($pic, 'volunteer_profiles/') ? substr($pic, strlen('volunteer_profiles/')) : $pic;
+                                $imgPath = $this->Url->build('/img/volunteer_profiles/' . h($picFile));
+                                $doc = (string)($user->volunteer->documents ?? '');
+                                if ($doc) { $doc = str_replace('volunteer_documents/', '', $doc); }
+                            ?>
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-id-card me-2 text-dark"></i>
+                                        <div class="fw-semibold text-dark">Volunteer</div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <?php if ($picFile): ?>
+                                            <img src="<?= $imgPath ?>" alt="Profile" class="rounded-circle" style="width:48px;height:48px;object-fit:cover;">
+                                        <?php else: ?>
+                                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                                                <i class="fas fa-user text-white"></i>
+                                            </div>
+                                        <?php endif; ?>
+                                        <div>
+                                            <div><?= h($user->volunteer->first_name . ' ' . $user->volunteer->last_name) ?></div>
+                                            <div class="text-muted small"><i class="fas fa-envelope me-1"></i><?= h($user->volunteer->email ?? '') ?></div>
+                                            <?php if (!empty($doc)): ?>
+                                                <div class="mt-1">
+                                                    <a href="<?= $this->Url->build('/volunteer_documents/' . h($doc)) ?>" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-file-pdf me-1"></i>View Documents
+                                                    </a>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         <?php endif; ?>
-                        <?= h(ucfirst($user->role)) ?>
-                    </span>
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">User ID</div>
-                <div class="info-value">
-                    <i class="bi bi-hash"></i>
-                    <?= h($user->id) ?>
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Created</div>
-                <div class="info-value">
-                    <i class="bi bi-calendar3"></i>
-                    <?= $user->created ? $user->created->format('F d, Y \a\t g:i A') : '—' ?>
-                </div>
-            </div>
-            <?php if ($user->modified && $user->modified != $user->created): ?>
-                <div class="info-item">
-                    <div class="info-label">Last Modified</div>
-                    <div class="info-value">
-                        <i class="bi bi-clock-history"></i>
-                        <?= $user->modified->format('F d, Y \a\t g:i A') ?>
-                    </div>
-                </div>
-            <?php endif; ?>
-        </div>
 
-        <!-- Volunteer Association -->
-        <?php if ($user->has('volunteer') && $user->volunteer): ?>
-            <div class="info-grid" style="margin-top: 1rem; padding-top: 1.5rem; border-top: 2px solid var(--m3-surface-variant);">
-                <div class="info-item">
-                    <div class="info-label">Associated Volunteer</div>
-                    <div class="info-value">
-                        <i class="bi bi-person-circle"></i>
-                        <?= $this->Html->link(
-                            $user->volunteer->first_name . ' ' . $user->volunteer->last_name,
-                            ['controller' => 'Volunteers', 'action' => 'view', $user->volunteer->id],
-                            ['style' => 'color: var(--m3-primary); text-decoration: none; font-weight: 600;']
-                        ) ?>
-                    </div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Volunteer Email</div>
-                    <div class="info-value">
-                        <i class="bi bi-envelope"></i>
-                        <?= h($user->volunteer->email ?? '—') ?>
+                        <?php if ($this->Identity && $this->Identity->isLoggedIn() && (string)$this->Identity->get('id') === (string)$user->id): ?>
+                            <div class="alert alert-info d-flex align-items-center mt-2" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <div>This is your current user account.</div>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
-        <?php else: ?>
-            <div style="margin-top: 1rem; padding-top: 1.5rem; border-top: 2px solid var(--m3-surface-variant);">
-                <div class="info-item">
-                    <div class="info-label">Associated Volunteer</div>
-                    <div class="empty-value">
-                        <i class="bi bi-dash-circle"></i>
-                        No volunteer associated with this user
-                    </div>
-                </div>
-            </div>
-        <?php endif; ?>
+        </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
