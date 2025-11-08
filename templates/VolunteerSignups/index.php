@@ -321,12 +321,12 @@
         color: #92400E;
     }
 
-    .status-badge.approved {
+    .status-badge.hired {
         background: #D1FAE5;
         color: #065F46;
     }
 
-    .status-badge.rejected {
+    .status-badge.declined {
         background: #FEE2E2;
         color: #991B1B;
     }
@@ -565,8 +565,8 @@
             <?= $this->Form->select('status', [
                 'all' => 'All Status',
                 'pending' => 'Pending',
-                'approved' => 'Approved',
-                'rejected' => 'Rejected'
+                'hired' => 'Hired',
+                'declined' => 'Declined'
             ], [
                 'class' => 'filter-select',
                 'value' => $statusFilter ?? 'all',
@@ -634,7 +634,7 @@
                     <?php foreach ($volunteerSignups as $volunteerSignup): 
                         $initials = strtoupper(substr($volunteerSignup->first_name ?? '', 0, 1) . substr($volunteerSignup->last_name ?? '', 0, 1));
                         $status = strtolower($volunteerSignup->status ?? 'pending');
-                        $statusClass = $status === 'approved' ? 'approved' : ($status === 'rejected' ? 'rejected' : 'pending');
+                        $statusClass = $status === 'hired' ? 'hired' : ($status === 'declined' ? 'declined' : 'pending');
                     ?>
                         <tr>
                             <td>
@@ -673,9 +673,9 @@
                             </td>
                             <td>
                                 <span class="status-badge <?= $statusClass ?>">
-                                    <?php if ($statusClass === 'approved'): ?>
+                                    <?php if ($statusClass === 'hired'): ?>
                                         <i class="bi bi-check-circle"></i>
-                                    <?php elseif ($statusClass === 'rejected'): ?>
+                                    <?php elseif ($statusClass === 'declined'): ?>
                                         <i class="bi bi-x-circle"></i>
                                     <?php else: ?>
                                         <i class="bi bi-clock"></i>

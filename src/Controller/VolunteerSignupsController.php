@@ -84,7 +84,39 @@ class VolunteerSignupsController extends AppController
     {
         $volunteerSignup = $this->VolunteerSignups->newEmptyEntity();
         if ($this->request->is('post')) {
-            $volunteerSignup = $this->VolunteerSignups->patchEntity($volunteerSignup, $this->request->getData());
+            $data = $this->request->getData();
+
+            // Handle profile_picture upload
+            if (isset($data['profile_picture']) && $data['profile_picture'] instanceof \Laminas\Diactoros\UploadedFile) {
+                if (!empty($data['profile_picture']->getClientFilename()) && $data['profile_picture']->getError() === UPLOAD_ERR_OK) {
+                    $file = time() . '_' . $data['profile_picture']->getClientFilename();
+                    $uploadDir = WWW_ROOT . 'uploads' . DS . 'profiles' . DS;
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    $data['profile_picture']->moveTo($uploadDir . $file);
+                    $data['profile_picture'] = 'uploads/profiles/' . $file;
+                } else {
+                    unset($data['profile_picture']);
+                }
+            }
+
+            // Handle documents upload
+            if (isset($data['documents']) && $data['documents'] instanceof \Laminas\Diactoros\UploadedFile) {
+                if (!empty($data['documents']->getClientFilename()) && $data['documents']->getError() === UPLOAD_ERR_OK) {
+                    $file = time() . '_' . $data['documents']->getClientFilename();
+                    $uploadDir = WWW_ROOT . 'uploads' . DS . 'documents' . DS;
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    $data['documents']->moveTo($uploadDir . $file);
+                    $data['documents'] = 'uploads/documents/' . $file;
+                } else {
+                    unset($data['documents']);
+                }
+            }
+
+            $volunteerSignup = $this->VolunteerSignups->patchEntity($volunteerSignup, $data);
             if ($this->VolunteerSignups->save($volunteerSignup)) {
                 $this->Flash->success(__('The volunteer signup has been saved.'));
 
@@ -106,13 +138,50 @@ class VolunteerSignupsController extends AppController
     {
         $volunteerSignup = $this->VolunteerSignups->get($id, contain: []);
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $volunteerSignup = $this->VolunteerSignups->patchEntity($volunteerSignup, $this->request->getData());
+            $data = $this->request->getData();
+
+            // Handle profile_picture upload
+            if (isset($data['profile_picture']) && $data['profile_picture'] instanceof \Laminas\Diactoros\UploadedFile) {
+                if (!empty($data['profile_picture']->getClientFilename()) && $data['profile_picture']->getError() === UPLOAD_ERR_OK) {
+                    // New file uploaded, process it
+                    $file = time() . '_' . $data['profile_picture']->getClientFilename();
+                    $uploadDir = WWW_ROOT . 'uploads' . DS . 'profiles' . DS;
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    $data['profile_picture']->moveTo($uploadDir . $file);
+                    $data['profile_picture'] = 'uploads/profiles/' . $file;
+                } else {
+                    // No file uploaded, remove from data to keep existing value
+                    unset($data['profile_picture']);
+                }
+            }
+
+            // Handle documents upload
+            if (isset($data['documents']) && $data['documents'] instanceof \Laminas\Diactoros\UploadedFile) {
+                if (!empty($data['documents']->getClientFilename()) && $data['documents']->getError() === UPLOAD_ERR_OK) {
+                    // New file uploaded, process it
+                    $file = time() . '_' . $data['documents']->getClientFilename();
+                    $uploadDir = WWW_ROOT . 'uploads' . DS . 'documents' . DS;
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    $data['documents']->moveTo($uploadDir . $file);
+                    $data['documents'] = 'uploads/documents/' . $file;
+                } else {
+                    // No file uploaded, remove from data to keep existing value
+                    unset($data['documents']);
+                }
+            }
+
+            $volunteerSignup = $this->VolunteerSignups->patchEntity($volunteerSignup, $data);
             if ($this->VolunteerSignups->save($volunteerSignup)) {
                 $this->Flash->success(__('The volunteer signup has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
+                // Reload the entity to get updated data
+                $volunteerSignup = $this->VolunteerSignups->get($id, contain: []);
+            } else {
+                $this->Flash->error(__('The volunteer signup could not be saved. Please, try again.'));
             }
-            $this->Flash->error(__('The volunteer signup could not be saved. Please, try again.'));
         }
         $this->set(compact('volunteerSignup'));
     }

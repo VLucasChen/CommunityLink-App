@@ -542,8 +542,8 @@
                 </label>
                 <?= $this->Form->select('status', [
                     'pending' => 'Pending',
-                    'approved' => 'Approved',
-                    'rejected' => 'Rejected'
+                    'hired' => 'Hired',
+                    'declined' => 'Declined'
                 ], [
                     'class' => 'form-select',
                     'id' => 'status',

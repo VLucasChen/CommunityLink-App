@@ -196,12 +196,12 @@
         color: #92400E;
     }
 
-    .status-badge.approved {
+    .status-badge.hired {
         background: #D1FAE5;
         color: #065F46;
     }
 
-    .status-badge.rejected {
+    .status-badge.declined {
         background: #FEE2E2;
         color: #991B1B;
     }
@@ -339,7 +339,7 @@
             <?php
             $initials = strtoupper(substr($volunteerSignup->first_name ?? '', 0, 1) . substr($volunteerSignup->last_name ?? '', 0, 1));
             $status = strtolower($volunteerSignup->status ?? 'pending');
-            $statusClass = $status === 'approved' ? 'approved' : ($status === 'rejected' ? 'rejected' : 'pending');
+            $statusClass = $status === 'hired' ? 'hired' : ($status === 'declined' ? 'declined' : 'pending');
             ?>
             <div class="user-avatar-large">
                 <?= $initials ?: '?' ?>
@@ -355,9 +355,9 @@
             </div>
             <div>
                 <span class="status-badge <?= $statusClass ?>">
-                    <?php if ($statusClass === 'approved'): ?>
+                    <?php if ($statusClass === 'hired'): ?>
                         <i class="bi bi-check-circle"></i>
-                    <?php elseif ($statusClass === 'rejected'): ?>
+                    <?php elseif ($statusClass === 'declined'): ?>
                         <i class="bi bi-x-circle"></i>
                     <?php else: ?>
                         <i class="bi bi-clock"></i>

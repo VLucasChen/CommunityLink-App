@@ -523,8 +523,8 @@
                 </label>
                 <?= $this->Form->select('status', [
                     'pending' => 'Pending',
-                    'approved' => 'Approved',
-                    'rejected' => 'Rejected'
+                    'hired' => 'Hired',
+                    'declined' => 'Declined'
                 ], [
                     'class' => 'form-select',
                     'id' => 'status',
@@ -555,3 +555,11 @@
 
     <?= $this->Form->end() ?>
 </div>
+
+<?= $this->element('success_modal', [
+    'modalId' => 'successModal',
+    'title' => 'Update Successful!',
+    'message' => 'The volunteer signup information has been updated successfully.',
+    'actionLink' => ['action' => 'index'],
+    'actionText' => 'View List'
+]) ?>
