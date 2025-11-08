@@ -52,6 +52,15 @@ return function (RouteBuilder $routes): void {
             'action' => 'publicEvents'
         ]);
 
+        // User profile page
+        $builder->connect('/profile/users/{id}', [
+            'controller' => 'Users',
+            'action' => 'profile'
+        ], [
+            'id' => '[a-f0-9\-]{36}',
+            'pass' => ['id']
+        ]);
+
         /**
          * ✅ DASHBOARD ROUTE (for Amy & assistants)
          * This can later be protected by Authentication plugin.

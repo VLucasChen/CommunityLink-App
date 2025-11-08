@@ -557,7 +557,7 @@ $isLoginPage = $this->request->getParam('controller') === 'Users' && $this->requ
                             } elseif (isset($user->id) || isset($user->user_id)) {
                                 $userId = $user->id ?? $user->user_id ?? null;
                                 if ($userId) {
-                                    $profileLink = ['controller' => 'Users', 'action' => 'view', $userId];
+                                    $profileLink = ['controller' => 'Users', 'action' => 'profile', $userId];
                                 }
                             }
                         ?>

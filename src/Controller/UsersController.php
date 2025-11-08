@@ -46,6 +46,19 @@ class UsersController extends AppController
     }
 
     /**
+     * Profile method - Public profile page
+     *
+     * @param string|null $id User id.
+     * @return \Cake\Http\Response|null|void Renders view
+     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
+     */
+    public function profile($id = null)
+    {
+        $user = $this->Users->get($id, contain: ['Volunteers']);
+        $this->set(compact('user'));
+    }
+
+    /**
      * Add method
      *
      * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
