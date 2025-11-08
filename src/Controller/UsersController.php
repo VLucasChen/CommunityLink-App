@@ -118,7 +118,7 @@ class UsersController extends AppController
     {
         $this->request->allowMethod(['get', 'post']);
         $result = $this->Authentication->getResult();
-
+        
         if ($result->isValid()) {
             // Lấy redirect từ Authentication, không dùng request->getQuery()
             $target = $this->Authentication->getLoginRedirect() ?? ['controller' => 'Pages', 'action' => 'dashboard'];

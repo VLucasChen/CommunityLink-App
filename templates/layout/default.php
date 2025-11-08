@@ -26,8 +26,12 @@ $cakeDescription = 'Event Manager';
     <?= $this->fetch('meta') ?>
     <?= $this->fetch('css') ?>
 </head>
-<body class="bg-light">
+<?php
+$isLoginPage = $this->request->getParam('controller') === 'Users' && $this->request->getParam('action') === 'login';
+?>
+<body class="bg-light <?= $isLoginPage ? 'login-page' : '' ?>">
 
+    <?php if (!$isLoginPage): ?>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
         <div class="container">
@@ -42,15 +46,22 @@ $cakeDescription = 'Event Manager';
             </div>
         </div>
     </nav>
+    <?php endif; ?>
 
     <!-- Main Content -->
-    <main class="py-4">
+    <main class="<?= $isLoginPage ? '' : 'py-4' ?>">
+        <?php if (!$isLoginPage): ?>
         <div class="container">
             <?= $this->Flash->render() ?>
             <?= $this->fetch('content') ?>
         </div>
+        <?php else: ?>
+            <?= $this->Flash->render() ?>
+            <?= $this->fetch('content') ?>
+        <?php endif; ?>
     </main>
 
+    <?php if (!$isLoginPage): ?>
     <!-- Footer -->
     <footer class="bg-dark text-white-50 py-4 mt-5">
         <div class="container text-center">
@@ -60,6 +71,7 @@ $cakeDescription = 'Event Manager';
             </small>
         </div>
     </footer>
+    <?php endif; ?>
 
     <!-- Bootstrap 5 JS (Bundle includes Popper) -->
     <?= $this->Html->script('https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js') ?>
