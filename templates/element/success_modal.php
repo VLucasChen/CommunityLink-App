@@ -59,6 +59,18 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
             // Check if Bootstrap is available
             if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                // Get message from flash if available
+                const flashMessage = flashMessages[0];
+                const flashText = flashMessage ? flashMessage.textContent.trim() : null;
+                
+                // Update modal message if flash message exists
+                if (flashText) {
+                    const modalMessageElement = successModalElement.querySelector('p.text-muted');
+                    if (modalMessageElement) {
+                        modalMessageElement.textContent = flashText;
+                    }
+                }
+                
                 const successModal = new bootstrap.Modal(successModalElement);
                 successModal.show();
                 

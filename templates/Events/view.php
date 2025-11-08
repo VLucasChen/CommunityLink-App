@@ -408,9 +408,7 @@
                         <div class="info-label">Contact Email</div>
                         <div class="info-value">
                             <i class="bi bi-envelope"></i>
-                            <a href="mailto:<?= h($event->contact_person_email) ?>" style="color: var(--m3-primary); text-decoration: none;">
-                                <?= h($event->contact_person_email) ?>
-                            </a>
+                            <?= h($event->contact_person_email) ?>
                         </div>
                     </div>
                 <?php endif; ?>

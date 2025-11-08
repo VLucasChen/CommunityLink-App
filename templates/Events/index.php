@@ -412,11 +412,11 @@
         <table class="table-modern">
             <thead>
                 <tr>
-                    <th><?= $this->Paginator->sort('title', 'Event Title') ?></th>
-                    <th><?= $this->Paginator->sort('location', 'Location') ?></th>
-                    <th><?= $this->Paginator->sort('event_date', 'Date') ?></th>
+                    <th>Event Title</th>
+                    <th>Location</th>
+                    <th>Date</th>
                     <th>Organisation</th>
-                    <th><?= $this->Paginator->sort('status', 'Status') ?></th>
+                    <th>Status</th>
                     <th class="text-center">Actions</th>
                 </tr>
             </thead>
@@ -546,3 +546,11 @@
         }
     });
 </script>
+
+<?= $this->element('success_modal', [
+    'modalId' => 'eventSuccessModal',
+    'title' => 'Success!',
+    'message' => 'The operation was completed successfully.',
+    'actionLink' => null,
+    'actionText' => null
+]) ?>
