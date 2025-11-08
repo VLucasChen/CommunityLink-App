@@ -80,10 +80,15 @@ return [
     /*
      * Email configuration.
      *
-     * Host and credential configuration in case you are using SmtpTransport
+     * A5 Requirement: Email transport should be in production mode (MailTransport)
+     * Configuration can be overridden here if needed (e.g., SMTP settings)
+     * By default, uses MailTransport from app.php which sends emails via PHP mail()
      *
      * See app.php for more configuration options.
      */
+    // EmailTransport configuration is inherited from app.php by default
+    // Uncomment and configure if you need to override SMTP settings:
+    /*
     'EmailTransport' => [
         'default' => [
             'host' => 'localhost',
@@ -94,4 +99,5 @@ return [
             'url' => env('EMAIL_TRANSPORT_DEFAULT_URL', null),
         ],
     ],
+    */
 ];

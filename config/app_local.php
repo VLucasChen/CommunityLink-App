@@ -1,7 +1,5 @@
 <?php
 
-use Cake\Database\Connection;
-use Cake\Database\Driver\Mysql;
 use function Cake\Core\env;
 
 /*
@@ -20,7 +18,8 @@ return [
      * Development Mode:
      * true: Errors and warnings shown.
      */
-    'debug' => filter_var(env('DEBUG', true), FILTER_VALIDATE_BOOLEAN),
+    // A5 Requirement: Disable debug mode for production
+    'debug' => filter_var(env('DEBUG', false), FILTER_VALIDATE_BOOLEAN),
 
     /*
      * Security and encryption configuration
@@ -41,31 +40,23 @@ return [
      */
     'Datasources' => [
         'default' => [
-            'className' => Connection::class,
-            'driver' => Mysql::class,
-            // Use 127.0.0.1 instead of localhost on macOS to force TCP connection
-            // If using MAMP, change to '127.0.0.1' and uncomment port => 8889
-            'host' => '127.0.0.1',
+            'host' => 'localhost',
             /*
              * CakePHP will use the default DB port based on the driver selected
-             * MySQL on MAMP uses port 8889, MAMP users will want to change this
-             * XAMPP/Homebrew uses default port 3306
+             * MySQL on MAMP uses port 8889, MAMP users will want to uncomment
+             * the following line and set the port accordingly
              */
-            //'port' => 8889,  // Uncomment this if using MAMP
+            //'port' => 'non_standard_port_number',
 
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
+            'username' => 'root',
+            'password' => '',
 
-            'database' => env('DB_DATABASE', 'A5'),
-            
+            'database' => 'A5',
             /*
-             * For macOS users experiencing socket issues, you can uncomment
-             * and set the socket path. Common paths:
-             * - MAMP: /Applications/MAMP/tmp/mysql/mysql.sock
-             * - Homebrew: /tmp/mysql.sock or /var/mysql/mysql.sock
-             * - XAMPP: /Applications/XAMPP/xamppfiles/var/mysql/mysql.sock
+             * If not using the default 'public' schema with the PostgreSQL driver
+             * set it here.
              */
-            //'unix_socket' => env('DB_SOCKET', '/tmp/mysql.sock'),
+            //'schema' => 'myapp',
 
             /*
              * You can use a DSN string to set the entire configuration
@@ -77,25 +68,28 @@ return [
          * The test connection is used during the test suite.
          */
         'test' => [
-            'className' => Connection::class,
-            'driver' => Mysql::class,
-            'host' => '127.0.0.1',
-            //'port' => 8889,  // Uncomment this if using MAMP
+            'host' => 'localhost',
+            //'port' => 'non_standard_port_number',
             'username' => 'root',
             'password' => '',
             'database' => 'A5_test',
             //'schema' => 'myapp',
-            'url' => env('DATABASE_TEST_URL', null),
+            'url' => env('DATABASE_TEST_URL', 'sqlite://127.0.0.1/tmp/tests.sqlite'),
         ],
     ],
 
     /*
      * Email configuration.
      *
-     * Host and credential configuration in case you are using SmtpTransport
+     * A5 Requirement: Email transport should be in production mode (MailTransport)
+     * Configuration can be overridden here if needed (e.g., SMTP settings)
+     * By default, uses MailTransport from app.php which sends emails via PHP mail()
      *
      * See app.php for more configuration options.
      */
+    // EmailTransport configuration is inherited from app.php by default
+    // Uncomment and configure if you need to override SMTP settings:
+    /*
     'EmailTransport' => [
         'default' => [
             'host' => 'localhost',
@@ -106,4 +100,5 @@ return [
             'url' => env('EMAIL_TRANSPORT_DEFAULT_URL', null),
         ],
     ],
+    */
 ];
