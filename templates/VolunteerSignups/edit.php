@@ -546,10 +546,9 @@
                 ['action' => 'view', $volunteerSignup->id],
                 ['class' => 'btn-cancel', 'escape' => false]
             ) ?>
-            <?= $this->Form->button('<i class="bi bi-check-circle"></i> Save Changes', [
-                'class' => 'btn-submit',
-                'escape' => false
-            ]) ?>
+            <button type="submit" class="btn-submit">
+                <i class="bi bi-check-circle"></i> Save Changes
+            </button>
         </div>
     </div>
 

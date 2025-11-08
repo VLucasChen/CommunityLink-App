@@ -648,11 +648,9 @@
 </div>
 
         <!-- Submit Button -->
-        <?= $this->Form->button('<i class="bi bi-check-circle-fill"></i> Submit Registration', [
-            'class' => 'btn btn-submit',
-            'type' => 'submit',
-            'escape' => false
-        ]) ?>
+        <button type="submit" class="btn btn-submit">
+            <i class="bi bi-check-circle-fill"></i> Submit Registration
+        </button>
 
 <?= $this->Form->end() ?>
     </div>

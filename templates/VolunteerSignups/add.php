@@ -565,10 +565,9 @@
                 ['action' => 'index'],
                 ['class' => 'btn-cancel', 'escape' => false]
             ) ?>
-            <?= $this->Form->button('<i class="bi bi-check-circle"></i> Create Signup', [
-                'class' => 'btn-submit',
-                'escape' => false
-            ]) ?>
+            <button type="submit" class="btn-submit">
+                <i class="bi bi-check-circle"></i> Create Signup
+            </button>
         </div>
     </div>
 
