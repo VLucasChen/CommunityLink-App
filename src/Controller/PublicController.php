@@ -5,15 +5,19 @@ namespace App\Controller;
 
 use Cake\Mailer\Mailer;
 
+/**
+ * PublicController
+ *
+ * @property \App\Model\Table\EventsTable $Events
+ * @property \App\Model\Table\OrganisationsTable $Organisations
+ * @property \App\Model\Table\VolunteerSignupsTable $VolunteerSignups
+ * @property \App\Model\Table\ContactMessagesTable $ContactMessages
+ */
 class PublicController extends AppController
 {
     public function initialize(): void
     {
         parent::initialize();
-        $this->loadModel('Events');
-        $this->loadModel('Organisations');
-        $this->loadModel('VolunteerSignups');
-        $this->loadModel('ContactMessages');
         $this->viewBuilder()->setLayout('public');
     }
 
