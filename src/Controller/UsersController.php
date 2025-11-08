@@ -77,13 +77,21 @@ class UsersController extends AppController
     {
         $user = $this->Users->get($id, contain: []);
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $user = $this->Users->patchEntity($user, $this->request->getData());
+            $data = $this->request->getData();
+            
+            // If password is empty, remove it from data to keep current password
+            if (empty($data['password'])) {
+                unset($data['password']);
+            }
+            
+            $user = $this->Users->patchEntity($user, $data);
             if ($this->Users->save($user)) {
                 $this->Flash->success(__('The user has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
+                // Reload the entity to get updated data
+                $user = $this->Users->get($id, contain: []);
+            } else {
+                $this->Flash->error(__('The user could not be saved. Please, try again.'));
             }
-            $this->Flash->error(__('The user could not be saved. Please, try again.'));
         }
         $volunteers = $this->Users->Volunteers->find('list', limit: 200)->all();
         $this->set(compact('user', 'volunteers'));

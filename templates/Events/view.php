@@ -200,6 +200,11 @@
         color: #065F46;
     }
 
+    .status-badge.ready-to-go {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+
     .status-badge.archive {
         background: var(--m3-surface-variant);
         color: var(--m3-on-surface);
@@ -248,6 +253,14 @@
         font-style: italic;
     }
 
+    .card-header {
+        flex-wrap: wrap;
+    }
+
+    .event-info-header {
+        min-width: 200px;
+    }
+
     @media (max-width: 768px) {
         .info-grid {
             grid-template-columns: 1fr;
@@ -260,6 +273,29 @@
         .btn-action {
             width: 100%;
             justify-content: center;
+        }
+
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .event-icon-large {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+        }
+
+        .event-title-large {
+            font-size: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+        }
+
+        .page-title i {
+            font-size: 1.75rem;
         }
     }
 </style>
@@ -321,9 +357,11 @@
             </div>
             <div>
                 <?php
-                    $status = strtolower(str_replace(' ', '-', $event->status ?? ''));
-                    $statusClass = match($status) {
+                    $status = $event->status ?? '';
+                    $statusLower = strtolower($status);
+                    $statusClass = match($statusLower) {
                         'preparing' => 'preparing',
+                        'ready to go' => 'ready',
                         'ready-to-go' => 'ready',
                         'archive' => 'archive',
                         'failed' => 'failed',
@@ -342,7 +380,7 @@
                     <?php else: ?>
                         <i class="bi bi-circle"></i>
                     <?php endif; ?>
-                    <?= h($event->status) ?>
+                    <?= h($status) ?>
                 </span>
             </div>
         </div>
