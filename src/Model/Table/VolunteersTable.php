@@ -30,10 +30,13 @@ class VolunteersTable extends Table
     {
         $validator
             ->notEmptyString('first_name')
-            ->notEmptyString('last_name')
-            ->email('email')
-            ->notEmptyString('phone')
-            ->notEmptyString('skills')
+            ->allowEmptyString('last_name') // Allow empty for edit
+            ->allowEmptyString('email') // Allow empty for edit
+            ->email('email', false, 'The provided value must be an e-mail address') // Validate format only if provided
+            ->allowEmptyString('phone') // Allow empty for edit
+            ->allowEmptyString('skills') // Allow empty for edit
+            ->allowEmptyString('availability')
+            ->allowEmptyString('self_intro')
             ->allowEmptyFile('profile_picture')
             ->allowEmptyFile('documents');
         return $validator;

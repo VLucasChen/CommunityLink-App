@@ -266,6 +266,40 @@
             ['controller' => 'Public', 'action' => 'home'],
             ['class' => 'btn-back', 'escape' => false]
         ) ?>
+        <?php
+        // Show Edit Profile button if user is viewing their own profile
+        $currentUserId = null;
+        // Try Identity helper first
+        if (isset($this->Identity)) {
+            try {
+                $currentUserId = $this->Identity->get('id');
+            } catch (\Exception $e) {
+                // Continue to next method
+            }
+        }
+        // Fallback: Try request attribute
+        if (!$currentUserId) {
+            try {
+                $identity = $this->request->getAttribute('identity');
+                if ($identity) {
+                    if (is_object($identity)) {
+                        $currentUserId = $identity->id ?? null;
+                    } elseif (is_array($identity)) {
+                        $currentUserId = $identity['id'] ?? $identity['data']['id'] ?? null;
+                    }
+                }
+            } catch (\Exception $e) {
+                // Ignore
+            }
+        }
+        if ($currentUserId && $currentUserId === $user->id):
+        ?>
+            <?= $this->Html->link(
+                '<i class="bi bi-pencil-square"></i> Edit Profile',
+                ['controller' => 'Public', 'action' => 'editProfile', $user->id],
+                ['class' => 'btn-back', 'style' => 'background: linear-gradient(135deg, var(--m3-primary) 0%, #764ba2 100%); color: white; border-color: var(--m3-primary);', 'escape' => false]
+            ) ?>
+        <?php endif; ?>
     </div>
 
     <!-- Main Info Card -->
