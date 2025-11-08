@@ -51,5 +51,77 @@ class AppController extends Controller
          */
         //$this->loadComponent('FormProtection');
     }
+
+    /**
+     * Check if current user has required role
+     * 
+     * @param string|array $roles Required role(s) - 'admin', 'assistant', or ['admin', 'assistant']
+     * @return bool
+     */
+    protected function checkRole($roles): bool
+    {
+        $identity = $this->Authentication->getIdentity();
+        if (!$identity) {
+            return false;
+        }
+
+        $userRole = null;
+        if (is_object($identity)) {
+            $userRole = $identity->role ?? null;
+            if (!$userRole && method_exists($identity, 'get')) {
+                $userRole = $identity->get('role');
+            }
+        } elseif (is_array($identity)) {
+            $userRole = $identity['role'] ?? $identity['data']['role'] ?? null;
+        }
+
+        if (!$userRole) {
+            return false;
+        }
+
+        $roles = is_array($roles) ? $roles : [$roles];
+        return in_array(strtolower($userRole), array_map('strtolower', $roles));
+    }
+
+    /**
+     * Require role - redirect if user doesn't have required role
+     * 
+     * @param string|array $roles Required role(s)
+     * @return void
+     */
+    protected function requireRole($roles): void
+    {
+        if (!$this->checkRole($roles)) {
+            $this->Flash->error(__('You do not have permission to access this page.'));
+            
+            // Get current user to determine redirect
+            $identity = $this->Authentication->getIdentity();
+            $userRole = null;
+            if (is_object($identity)) {
+                $userRole = $identity->role ?? null;
+            } elseif (is_array($identity)) {
+                $userRole = $identity['role'] ?? $identity['data']['role'] ?? null;
+            }
+            
+            // Redirect based on role
+            if (strtolower($userRole) === 'volunteer') {
+                // Volunteer can access their profile
+                $userId = null;
+                if (is_object($identity)) {
+                    $userId = $identity->id ?? null;
+                } elseif (is_array($identity)) {
+                    $userId = $identity['id'] ?? $identity['data']['id'] ?? null;
+                }
+                if ($userId) {
+                    $this->redirect(['controller' => 'Users', 'action' => 'profile', $userId]);
+                } else {
+                    $this->redirect(['controller' => 'Public', 'action' => 'home']);
+                }
+            } else {
+                // Not logged in or other roles
+                $this->redirect(['controller' => 'Public', 'action' => 'home']);
+            }
+        }
+    }
 }
 

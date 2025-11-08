@@ -28,7 +28,8 @@ class UsersTable extends Table
     {
         $validator
             ->notEmptyString('username')
-            ->notEmptyString('password')
+            ->allowEmptyString('password') // Password is optional (for edit)
+            ->minLength('password', 6, 'Password must be at least 6 characters long.')
             ->inList('role', ['admin', 'assistant', 'volunteer'], 'Invalid role.');
         return $validator;
     }

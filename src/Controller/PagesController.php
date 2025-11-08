@@ -55,6 +55,9 @@ class PagesController extends AppController
      */
     public function dashboard(): ?Response
     {
+        // Only admin and assistant can access dashboard
+        $this->requireRole(['admin', 'assistant']);
+
         // Get current user
         $user = $this->Authentication->getIdentity();
         

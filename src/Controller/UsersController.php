@@ -25,11 +25,23 @@ class UsersController extends AppController
      */
     public function index()
     {
+        // Only admin and assistant can access
+        $this->requireRole(['admin', 'assistant']);
+
         $query = $this->Users->find()
             ->contain(['Volunteers']);
         $users = $this->paginate($query);
 
-        $this->set(compact('users'));
+        // Get current user role for UI restrictions
+        $identity = $this->Authentication->getIdentity();
+        $currentUserRole = null;
+        if (is_object($identity)) {
+            $currentUserRole = $identity->role ?? null;
+        } elseif (is_array($identity)) {
+            $currentUserRole = $identity['role'] ?? $identity['data']['role'] ?? null;
+        }
+
+        $this->set(compact('users', 'currentUserRole'));
     }
 
     /**
@@ -41,8 +53,21 @@ class UsersController extends AppController
      */
     public function view($id = null)
     {
+        // Only admin and assistant can access
+        $this->requireRole(['admin', 'assistant']);
+
         $user = $this->Users->get($id, contain: ['Volunteers']);
-        $this->set(compact('user'));
+        
+        // Get current user role for UI restrictions
+        $identity = $this->Authentication->getIdentity();
+        $currentUserRole = null;
+        if (is_object($identity)) {
+            $currentUserRole = $identity->role ?? null;
+        } elseif (is_array($identity)) {
+            $currentUserRole = $identity['role'] ?? $identity['data']['role'] ?? null;
+        }
+
+        $this->set(compact('user', 'currentUserRole'));
     }
 
     /**
@@ -65,12 +90,23 @@ class UsersController extends AppController
      */
     public function add()
     {
+        // Only admin and assistant can access
+        $this->requireRole(['admin', 'assistant']);
+
         $user = $this->Users->newEmptyEntity();
         if ($this->request->is('post')) {
             $data = $this->request->getData();
             
-            // If role is admin, remove volunteer_id
-            if (isset($data['role']) && $data['role'] === 'admin') {
+            // Password is required when adding a new user
+            if (empty($data['password'])) {
+                $this->Flash->error(__('Password is required when creating a new user.'));
+                $volunteers = $this->Users->Volunteers->find('list', limit: 200)->all();
+                $this->set(compact('user', 'volunteers'));
+                return;
+            }
+            
+            // If role is admin or assistant, remove volunteer_id
+            if (isset($data['role']) && in_array($data['role'], ['admin', 'assistant'])) {
                 $data['volunteer_id'] = null;
             }
             
@@ -96,6 +132,9 @@ class UsersController extends AppController
      */
     public function edit($id = null)
     {
+        // Only admin and assistant can access
+        $this->requireRole(['admin', 'assistant']);
+
         $user = $this->Users->get($id, contain: []);
         if ($this->request->is(['patch', 'post', 'put'])) {
             $data = $this->request->getData();
@@ -105,8 +144,8 @@ class UsersController extends AppController
                 unset($data['password']);
             }
             
-            // If role is admin, remove volunteer_id
-            if (isset($data['role']) && $data['role'] === 'admin') {
+            // If role is admin or assistant, remove volunteer_id
+            if (isset($data['role']) && in_array($data['role'], ['admin', 'assistant'])) {
                 $data['volunteer_id'] = null;
             }
             
@@ -132,8 +171,27 @@ class UsersController extends AppController
      */
     public function delete($id = null)
     {
+        // Only admin and assistant can access
+        $this->requireRole(['admin', 'assistant']);
+
         $this->request->allowMethod(['post', 'delete']);
         $user = $this->Users->get($id);
+        
+        // Check if current user is assistant trying to delete an admin
+        $identity = $this->Authentication->getIdentity();
+        $currentUserRole = null;
+        if (is_object($identity)) {
+            $currentUserRole = $identity->role ?? null;
+        } elseif (is_array($identity)) {
+            $currentUserRole = $identity['role'] ?? $identity['data']['role'] ?? null;
+        }
+        
+        // Assistant cannot delete admin users
+        if (strtolower($currentUserRole) === 'assistant' && strtolower($user->role) === 'admin') {
+            $this->Flash->error(__('You do not have permission to delete admin users.'));
+            return $this->redirect(['action' => 'index']);
+        }
+        
         if ($this->Users->delete($user)) {
             $this->Flash->success(__('The user has been deleted.'));
         } else {
@@ -154,9 +212,31 @@ class UsersController extends AppController
         $result = $this->Authentication->getResult();
         
         if ($result->isValid()) {
-            // Lấy redirect từ Authentication, không dùng request->getQuery()
-            $target = $this->Authentication->getLoginRedirect() ?? ['controller' => 'Pages', 'action' => 'dashboard'];
-            return $this->redirect($target);
+            // Get user identity to determine redirect based on role
+            $identity = $this->Authentication->getIdentity();
+            $userRole = null;
+            $userId = null;
+            
+            if (is_object($identity)) {
+                $userRole = $identity->role ?? null;
+                $userId = $identity->id ?? null;
+            } elseif (is_array($identity)) {
+                $userRole = $identity['role'] ?? $identity['data']['role'] ?? null;
+                $userId = $identity['id'] ?? $identity['data']['id'] ?? null;
+            }
+            
+            // Redirect based on role
+            if (strtolower($userRole) === 'volunteer') {
+                // Volunteer redirects to public home
+                return $this->redirect(['controller' => 'Public', 'action' => 'home']);
+            } elseif (in_array(strtolower($userRole), ['admin', 'assistant'])) {
+                // Admin and assistant redirect to dashboard
+                $target = $this->Authentication->getLoginRedirect() ?? ['controller' => 'Pages', 'action' => 'dashboard'];
+                return $this->redirect($target);
+            } else {
+                // Default fallback
+                return $this->redirect(['controller' => 'Public', 'action' => 'home']);
+            }
         }
 
         if ($this->request->is('post') && !$result->isValid()) {

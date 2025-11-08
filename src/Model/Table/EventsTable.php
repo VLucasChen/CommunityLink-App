@@ -48,4 +48,33 @@ class EventsTable extends Table
         $rules->add($rules->existsIn('organisation_id', 'Organisations'));
         return $rules;
     }
+
+    /**
+     * Update expired events from Preparing to Failed
+     * Events that have passed their event_date and are still in Preparing status
+     * will be automatically updated to Failed status
+     */
+    public function updateExpiredEvents(): int
+    {
+        $today = new \Cake\I18n\Date();
+        
+        // Find all events that are past their event_date and still in Preparing status
+        $expiredEvents = $this->find()
+            ->where([
+                'event_date <' => $today,
+                'status' => 'Preparing'
+            ])
+            ->toArray();
+        
+        $count = 0;
+        // Update each expired event to Failed status
+        foreach ($expiredEvents as $event) {
+            $event->status = 'Failed';
+            if ($this->save($event)) {
+                $count++;
+            }
+        }
+        
+        return $count;
+    }
 }

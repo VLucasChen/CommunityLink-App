@@ -525,8 +525,8 @@ $isLoginPage = $this->request->getParam('controller') === 'Users' && $this->requ
                         ['controller' => 'ContactMessages', 'action' => 'index', 'label' => 'Contacts', 'icon' => 'bi-envelope'],
                     ];
                     
-                    // Add Users link for admin only
-                    if ($isAuthenticated && $user && isset($user->role) && $user->role === 'admin') {
+                    // Add Users link for admin and assistant
+                    if ($isAuthenticated && $user && isset($user->role) && in_array(strtolower($user->role), ['admin', 'assistant'])) {
                         $adminNavLinks[] = ['controller' => 'Users', 'action' => 'index', 'label' => 'Users', 'icon' => 'bi-person-gear'];
                     }
                     

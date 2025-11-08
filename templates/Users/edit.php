@@ -423,11 +423,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const volunteerHint = document.getElementById('volunteer-hint');
 
     function toggleVolunteerField() {
-        if (roleSelect.value === 'admin') {
+        if (roleSelect.value === 'admin' || roleSelect.value === 'assistant') {
             volunteerSelect.disabled = true;
             volunteerSelect.value = '';
             volunteerWrapper.classList.add('disabled');
-            volunteerHint.innerHTML = '<i class="bi bi-info-circle"></i> Admin users cannot be associated with volunteers';
+            const roleText = roleSelect.value === 'admin' ? 'Admin' : 'Assistant';
+            volunteerHint.innerHTML = '<i class="bi bi-info-circle"></i> ' + roleText + ' users cannot be associated with volunteers';
             volunteerHint.style.color = 'var(--m3-outline)';
         } else {
             volunteerSelect.disabled = false;

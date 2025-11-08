@@ -456,16 +456,25 @@
                                         ['action' => 'edit', $user->id],
                                         ['class' => 'btn-icon edit', 'title' => 'Edit', 'escape' => false]
                                     ) ?>
-                                    <?= $this->Form->postLink(
-                                        '<i class="bi bi-trash"></i>',
-                                        ['action' => 'delete', $user->id],
-                                        [
-                                            'class' => 'btn-icon delete',
-                                            'title' => 'Delete',
-                                            'confirm' => __('Are you sure you want to delete user "{0}"?', $user->username),
-                                            'escape' => false
-                                        ]
-                                    ) ?>
+                                    <?php 
+                                    // Assistant cannot delete admin users
+                                    $canDelete = true;
+                                    if (isset($currentUserRole) && strtolower($currentUserRole) === 'assistant' && strtolower($user->role) === 'admin') {
+                                        $canDelete = false;
+                                    }
+                                    ?>
+                                    <?php if ($canDelete): ?>
+                                        <?= $this->Form->postLink(
+                                            '<i class="bi bi-trash"></i>',
+                                            ['action' => 'delete', $user->id],
+                                            [
+                                                'class' => 'btn-icon delete',
+                                                'title' => 'Delete',
+                                                'confirm' => __('Are you sure you want to delete user "{0}"?', $user->username),
+                                                'escape' => false
+                                            ]
+                                        ) ?>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

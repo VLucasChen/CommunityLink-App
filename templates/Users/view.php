@@ -278,15 +278,24 @@
                 ['action' => 'edit', $user->id],
                 ['class' => 'btn-action btn-primary', 'escape' => false]
             ) ?>
-            <?= $this->Form->postLink(
-                '<i class="bi bi-trash"></i> Delete',
-                ['action' => 'delete', $user->id],
-                [
-                    'class' => 'btn-action btn-danger',
-                    'confirm' => __('Are you sure you want to delete user "{0}"?', $user->username),
-                    'escape' => false
-                ]
-            ) ?>
+            <?php 
+            // Assistant cannot delete admin users
+            $canDelete = true;
+            if (isset($currentUserRole) && strtolower($currentUserRole) === 'assistant' && strtolower($user->role) === 'admin') {
+                $canDelete = false;
+            }
+            ?>
+            <?php if ($canDelete): ?>
+                <?= $this->Form->postLink(
+                    '<i class="bi bi-trash"></i> Delete',
+                    ['action' => 'delete', $user->id],
+                    [
+                        'class' => 'btn-action btn-danger',
+                        'confirm' => __('Are you sure you want to delete user "{0}"?', $user->username),
+                        'escape' => false
+                    ]
+                ) ?>
+            <?php endif; ?>
         </div>
     </div>
 

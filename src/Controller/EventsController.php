@@ -12,6 +12,9 @@ class EventsController extends AppController
      */
     public function index()
     {
+        // Update expired events before loading the list
+        $this->Events->updateExpiredEvents();
+        
         $keyword = $this->request->getQuery('keyword');
 
         // Base query with Organisation join
@@ -40,6 +43,9 @@ class EventsController extends AppController
      */
     public function view($id = null)
     {
+        // Update expired events before loading the event
+        $this->Events->updateExpiredEvents();
+        
         if (!$id) {
             $this->Flash->error(__('Invalid event ID.'));
             return $this->redirect(['action' => 'index']);
