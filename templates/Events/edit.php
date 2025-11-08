@@ -1,8 +1,8 @@
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold text-primary mb-0 d-flex align-items-center gap-2">
-            <span class="fs-4"><?= $event->isNew() ? '➕' : '✏️' ?></span>
-            <?= $event->isNew() ? 'Add New Event' : 'Edit Event' ?>
+            <span class="fs-4">✏️</span>
+            Edit Event
         </h2>
         <?= $this->Html->link(
             '<i class="bi bi-arrow-left"></i> Back to List',
@@ -15,12 +15,28 @@
         <div class="card-header bg-gradient bg-primary text-white py-3">
             <h5 class="mb-0 fw-semibold d-flex align-items-center gap-2">
                 <i class="bi bi-calendar-event"></i>
-                <?= $event->isNew() ? 'Create New Event' : 'Update Event Details' ?>
+                Update Event Details
             </h5>
         </div>
 
         <div class="card-body p-4 p-lg-5">
             <?= $this->Form->create($event, ['class' => 'needs-validation', 'novalidate' => true]) ?>
+
+            <!-- Validation Errors -->
+            <?php if ($event->getErrors()): ?>
+                <div class="alert alert-danger alert-dismissible fade show rounded-4" role="alert">
+                    <strong><i class="bi bi-exclamation-triangle"></i> Please fix the following errors:</strong>
+                    <ul class="mb-0 mt-2">
+                        <?php foreach ($event->getErrors() as $field => $errors): ?>
+                            <?php foreach ($errors as $error): ?>
+                                <li><?= h($field) ?>: <?= h($error) ?></li>
+                            <?php endforeach; ?>
+                        <?php endforeach; ?>
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <?php endif; ?>
+
             <div class="row g-4">
 
                 <!-- ========== Basic Information ========== -->
@@ -56,7 +72,6 @@
                 </div>
 
                 <div class="col-md-6">
-                    sensitive
                     <?= $this->Form->control('organisation_id', [
                         'label' => 'Organisation',
                         'options' => $organisations,
@@ -180,7 +195,7 @@
             <!-- ========== Action Buttons ========== -->
             <div class="d-flex flex-wrap gap-2 mt-5 pt-3 border-top">
                 <?= $this->Form->button(
-                    ' Save Event',
+                    '<i class="bi bi-check-circle"></i> Update Event',
                     ['class' => 'btn btn-primary btn-lg px-5', 'escape' => false]
                 ) ?>
                 <?= $this->Html->link(
