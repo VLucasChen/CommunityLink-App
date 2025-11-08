@@ -14,7 +14,7 @@
 ## Database Dump File
 
 **Filename:** `schema_data.sql`  
-**Location:** Project root directory (`/schema_data.sql`)
+**Location:** `LAB01_GROUP24/schema_data.sql`
 
 This file contains:
 - Complete table creation statements with primary keys, foreign keys, and column constraints
@@ -130,7 +130,7 @@ The database dump file (`schema_data.sql`) includes:
 
 1. Clone the repository:
 ```bash
-git clone [repository-url]
+git clone https://git.infotech.monash.edu/fit2104/fit2104-2025-s2/assessment-5
 cd FIT2104_A5
 ```
 
@@ -146,8 +146,8 @@ composer install
    'Datasources' => [
        'default' => [
            'host' => 'localhost',
-           'username' => 'your_username',
-           'password' => 'your_password',
+           'username' => 'your_username', (My username is:'root')
+           'password' => 'your_password', (My password is: '')
            'database' => 'A5',
            // ... other settings
        ],
