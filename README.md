@@ -4,7 +4,8 @@
 
 ## Authors
 
-- **HUANG YICHEN** - Student ID: 35860537 - Submitted Date: 07/11/2025
+- **HUANG YICHEN** - Student ID: 35860537 - Submitted Date: 09/11/2025
+- **LE HOANG** - Student ID: 33603294 - Submitted Date: 09/11/2025
 
 ## Repository
 
@@ -73,6 +74,29 @@ Volunteer accounts are not pre-created in the database. To create a volunteer ac
 ### Task 19: Code Quality and Best Practices
 
 HUANG YICHEN agrees with the work breakdown agreement. 07/11/2025
+
+---
+
+- **LE HOANG (33603294):** 
+
+### Task 1: Users Management
+### Task 2: Contact Messages Management
+### Task 3: Search and Filter Functionality
+### Task 4: Pagination Implementation
+### Task 5: File Upload Handling
+### Task 6: Email Notifications
+### Task 7: Validation and Error Handling
+### Task 8: UI/UX Improvements and Virtual Fields
+### Task 9: Pagination Implementation
+### Task 10: File Upload Handling
+### Task 11: Email Notifications
+### Task 12: Validation and Error Handling
+### Task 13: UI/UX Improvements and Virtual Fields
+### Task 14: CakePHP Configuration
+### Task 15: Branding Customization
+### Task 16: Code Quality and Best Practices
+
+LE HOANG agrees with the work breakdown agreement. 07/11/2025
 
 ---
 
