@@ -35,15 +35,87 @@ $isLoginPage = $this->request->getParam('controller') === 'Users' && $this->requ
     $currentAction = $this->request->getParam('action');
     $isAuthenticated = false;
     $user = null;
-    if (isset($this->Identity) && method_exists($this->Identity, 'isLoggedIn')) {
+    $username = null;
+    $userRole = null;
+    
+    // Try to get identity from request attribute (most reliable)
+    try {
+        $identity = $this->request->getAttribute('identity');
+        if ($identity) {
+            $isAuthenticated = true;
+            if (is_object($identity)) {
+                // Try direct property access
+                $username = $identity->username ?? null;
+                $userRole = $identity->role ?? null;
+                
+                // If that doesn't work, try get() method
+                if (!$username && method_exists($identity, 'get')) {
+                    $username = $identity->get('username');
+                    $userRole = $identity->get('role');
+                }
+            } elseif (is_array($identity)) {
+                $username = $identity['username'] ?? $identity['data']['username'] ?? null;
+                $userRole = $identity['role'] ?? $identity['data']['role'] ?? null;
+            }
+        }
+    } catch (\Exception $e) {
+        // Continue to Identity helper
+    }
+    
+    // Fallback: Try Identity helper
+    if (!$isAuthenticated && isset($this->Identity)) {
         try {
-            $isAuthenticated = $this->Identity->isLoggedIn();
-            if ($isAuthenticated) {
-                $user = $this->Identity->get('originalData') ?? $this->Identity->get('data');
+            if (method_exists($this->Identity, 'isLoggedIn')) {
+                $isAuthenticated = $this->Identity->isLoggedIn();
+                if ($isAuthenticated) {
+                    $username = $this->Identity->get('username') ?? $username;
+                    $userRole = $this->Identity->get('role') ?? $userRole;
+                }
             }
         } catch (\Exception $e) {
-            $isAuthenticated = false;
+            // Ignore
         }
+    }
+    
+    // Create user object if we have username
+    if ($username) {
+        // Try to get additional user data
+        $userId = null;
+        $volunteerId = null;
+        
+        try {
+            $identity = $this->request->getAttribute('identity');
+            if ($identity) {
+                if (is_object($identity)) {
+                    $userId = $identity->id ?? $identity->user_id ?? null;
+                    $volunteerId = $identity->volunteer_id ?? null;
+                } elseif (is_array($identity)) {
+                    $userId = $identity['id'] ?? $identity['user_id'] ?? null;
+                    $volunteerId = $identity['volunteer_id'] ?? null;
+                }
+            }
+        } catch (\Exception $e) {
+            // Ignore
+        }
+        
+        // Try Identity helper
+        if (!$userId && isset($this->Identity)) {
+            try {
+                $userId = $this->Identity->get('id') ?? $this->Identity->get('user_id') ?? null;
+                $volunteerId = $this->Identity->get('volunteer_id') ?? null;
+            } catch (\Exception $e) {
+                // Ignore
+            }
+        }
+        
+        $user = (object)[
+            'username' => $username,
+            'role' => $userRole ?? 'user',
+            'id' => $userId,
+            'user_id' => $userId,
+            'volunteer_id' => $volunteerId
+        ];
+        $isAuthenticated = true;
     }
     ?>
     <?php if (!$isLoginPage): ?>
@@ -164,6 +236,7 @@ $isLoginPage = $this->request->getParam('controller') === 'Users' && $this->requ
             display: flex;
             align-items: center;
             gap: 1rem;
+            position: relative;
         }
 
         .user-info {
@@ -172,20 +245,198 @@ $isLoginPage = $this->request->getParam('controller') === 'Users' && $this->requ
             gap: 0.75rem;
             color: white;
             padding: 0.5rem 1rem;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
+            background: transparent;
+            border: none;
+            border-radius: 0;
             font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .user-info:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        .user-info .bi-chevron-down {
+            display: none;
         }
 
         .user-avatar {
-            width: 32px;
-            height: 32px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.25);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 18px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .user-avatar i {
+            display: block;
+            color: white;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 1rem);
+            right: 0;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1);
+            min-width: 280px;
+            padding: 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-15px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .user-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+
+        .dropdown-header {
+            padding: 1.5rem;
+            background: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .dropdown-header-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .dropdown-header-avatar i {
+            display: block;
+            color: white;
+        }
+
+        .dropdown-header-content {
+            flex: 1;
+        }
+
+        .dropdown-username {
+            font-weight: 700;
+            color: var(--m3-on-surface);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.01em;
+        }
+
+        .dropdown-role {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 0.875rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .role-badge.admin {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            color: white;
+        }
+
+        .role-badge.assistant {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+        }
+
+        .role-badge.volunteer {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+        }
+
+        .role-badge.default {
+            background: #E5E7EB;
+            color: #374151;
+        }
+
+        .dropdown-body {
+            padding: 0.5rem;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            padding: 0.75rem 1rem;
+            color: #1F2937;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            margin: 0.125rem 0;
+            position: relative;
+        }
+
+        .dropdown-item span {
+            flex: 1;
+        }
+
+        .dropdown-item i {
+            font-size: 1.125rem;
+            width: 24px;
+            text-align: center;
+            color: #6B7280;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background: #F3F4F6;
+            color: #1F2937;
+        }
+
+        .dropdown-item:hover i {
+            color: #667eea;
+        }
+
+        .dropdown-item.danger {
+            color: #DC2626;
+        }
+
+        .dropdown-item.danger i {
+            color: #DC2626;
+        }
+
+        .dropdown-item.danger:hover {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .dropdown-item.danger:hover i {
+            color: #991B1B;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #E5E7EB;
+            margin: 0.5rem 0.75rem;
         }
 
         .btn-logout-admin {
@@ -225,9 +476,22 @@ $isLoginPage = $this->request->getParam('controller') === 'Users' && $this->requ
                 flex-direction: column;
                 width: 100%;
                 margin-top: 0.5rem;
+                position: relative;
             }
 
-            .user-info,
+            .user-info {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .user-dropdown {
+                position: static;
+                width: 100%;
+                margin-top: 0.5rem;
+                box-shadow: none;
+                border: 1px solid var(--m3-surface-variant);
+            }
+
             .btn-logout-admin {
                 width: 100%;
                 justify-content: center;
@@ -280,23 +544,81 @@ $isLoginPage = $this->request->getParam('controller') === 'Users' && $this->requ
                     <?php endforeach; ?>
                     
                     <div class="user-menu">
-                        <?php if ($isAuthenticated && $user): ?>
-                            <div class="user-info">
+                        <?php if ($isAuthenticated && $user && $username): 
+                            $userRole = strtolower($user->role ?? 'user');
+                            $roleClass = $userRole;
+                            $roleLabel = ucfirst($userRole);
+                            $isAdmin = ($roleClass === 'admin');
+                            
+                            // Determine profile link based on role
+                            $profileLink = ['controller' => 'Pages', 'action' => 'dashboard'];
+                            if (isset($user->volunteer_id) && $user->volunteer_id) {
+                                $profileLink = ['controller' => 'Volunteers', 'action' => 'view', $user->volunteer_id];
+                            } elseif (isset($user->id) || isset($user->user_id)) {
+                                $userId = $user->id ?? $user->user_id ?? null;
+                                if ($userId) {
+                                    $profileLink = ['controller' => 'Users', 'action' => 'view', $userId];
+                                }
+                            }
+                        ?>
+                            <div class="user-info" id="userInfoToggle">
                                 <div class="user-avatar">
-                                    <i class="bi bi-person-fill"></i>
+                                    <?php if ($isAdmin): ?>
+                                        <i class="bi bi-shield-check-fill"></i>
+                                    <?php elseif ($roleClass === 'assistant'): ?>
+                                        <i class="bi bi-person-badge-fill"></i>
+                                    <?php else: ?>
+                                        <i class="bi bi-person-fill"></i>
+                                    <?php endif; ?>
                                 </div>
                                 <div>
-                                    <div style="font-weight: 600;"><?= h($user->username ?? 'User') ?></div>
+                                    <div style="font-weight: 600;"><?= h($user->username) ?></div>
                                     <small style="opacity: 0.8; font-size: 0.8rem;">
-                                        <?= h(ucfirst($user->role ?? 'User')) ?>
+                                        <?= h($roleLabel) ?>
                                     </small>
                                 </div>
                             </div>
-                            <?= $this->Html->link(
-                                '<i class="bi bi-box-arrow-right"></i> Logout',
-                                ['controller' => 'Users', 'action' => 'logout'],
-                                ['class' => 'btn-logout-admin', 'escape' => false]
-                            ) ?>
+                            <div class="user-dropdown" id="userDropdown">
+                                <div class="dropdown-header">
+                                    <div class="dropdown-header-avatar">
+                                        <?php if ($isAdmin): ?>
+                                            <i class="bi bi-shield-check-fill"></i>
+                                        <?php elseif ($roleClass === 'assistant'): ?>
+                                            <i class="bi bi-person-badge-fill"></i>
+                                        <?php else: ?>
+                                            <i class="bi bi-person-fill"></i>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="dropdown-header-content">
+                                        <div class="dropdown-username"><?= h($user->username) ?></div>
+                                        <div class="dropdown-role">
+                                            <span class="role-badge <?= $roleClass ?>">
+                                                <?php if ($isAdmin): ?>
+                                                    <i class="bi bi-shield-check"></i>
+                                                <?php elseif ($roleClass === 'assistant'): ?>
+                                                    <i class="bi bi-person-badge"></i>
+                                                <?php else: ?>
+                                                    <i class="bi bi-person"></i>
+                                                <?php endif; ?>
+                                                <?= h($roleLabel) ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="dropdown-body">
+                                    <?= $this->Html->link(
+                                        '<i class="bi bi-person-circle"></i> <span>Profile</span>',
+                                        $profileLink,
+                                        ['class' => 'dropdown-item', 'escape' => false]
+                                    ) ?>
+                                    <div class="dropdown-divider"></div>
+                                    <?= $this->Html->link(
+                                        '<i class="bi bi-box-arrow-right"></i> <span>Logout</span>',
+                                        ['controller' => 'Users', 'action' => 'logout'],
+                                        ['class' => 'dropdown-item danger', 'escape' => false]
+                                    ) ?>
+                                </div>
+                            </div>
                         <?php else: ?>
                             <?= $this->Html->link(
                                 '<i class="bi bi-box-arrow-in-right"></i> Login',
@@ -338,6 +660,53 @@ $isLoginPage = $this->request->getParam('controller') === 'Users' && $this->requ
                             }
                         }
                     });
+                });
+            }
+
+            // User dropdown toggle
+            const userInfoToggle = document.getElementById('userInfoToggle');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            if (userInfoToggle && userDropdown) {
+                // Toggle dropdown when clicking on user-info
+                userInfoToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('show');
+                });
+
+                // Close dropdown when clicking on dropdown items
+                document.querySelectorAll('.dropdown-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        userDropdown.classList.remove('show');
+                        
+                        // Also close mobile menu if open
+                        const navbarCollapse = document.getElementById('adminNavbarNav');
+                        if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+                            if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
+                                const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+                                    toggle: false
+                                });
+                                bsCollapse.hide();
+                            } else {
+                                navbarCollapse.classList.remove('show');
+                            }
+                        }
+                    });
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userInfoToggle.contains(e.target) && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.remove('show');
+                    }
+                });
+
+                // Close dropdown on escape key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        userDropdown.classList.remove('show');
+                    }
                 });
             }
         });

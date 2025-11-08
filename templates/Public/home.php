@@ -456,7 +456,7 @@
         </p>
         <?php if (!empty($events) && count($events) > 0): ?>
             <div class="row g-4">
-                <?php foreach ($events as $event): ?>
+<?php foreach ($events as $event): ?>
                     <div class="col-md-4">
                         <div class="event-card">
                             <div class="event-header">
