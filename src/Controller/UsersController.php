@@ -79,6 +79,9 @@ class UsersController extends AppController
      */
     public function profile($id = null)
     {
+        // Only admin and assistant can access
+        $this->requireRole(['admin', 'assistant']);
+        
         $user = $this->Users->get($id, contain: ['Volunteers']);
         $this->set(compact('user'));
     }

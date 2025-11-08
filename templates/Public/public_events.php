@@ -327,17 +327,11 @@
                                     <?php endif; ?>
                                 </div>
                                 
-                                <?php if ($this->Identity->isLoggedIn()): ?>
-                                    <?= $this->Html->link(
-                                        'View Details <i class="bi bi-arrow-right"></i>',
-                                        ['controller' => 'Events', 'action' => 'view', $event->id],
-                                        ['class' => 'event-link', 'escape' => false]
-                                    ) ?>
-                                <?php else: ?>
-                                    <div class="event-link" style="cursor: pointer;" onclick="alert('Please login to view event details')">
-                                        View Details <i class="bi bi-arrow-right"></i>
-                                    </div>
-                                <?php endif; ?>
+                                <?= $this->Html->link(
+                                    'View Details <i class="bi bi-arrow-right"></i>',
+                                    ['controller' => 'Public', 'action' => 'viewEvent', $event->id],
+                                    ['class' => 'event-link', 'escape' => false]
+                                ) ?>
                             </div>
                         </div>
                     </div>

@@ -476,7 +476,7 @@
                                 </p>
                                 <?= $this->Html->link(
                                     'View Details <i class="bi bi-arrow-right"></i>',
-                                    ['controller' => 'Public', 'action' => 'publicEvents'],
+                                    ['controller' => 'Public', 'action' => 'viewEvent', $event->id],
                                     ['class' => 'event-link', 'escape' => false]
                                 ) ?>
       </div>

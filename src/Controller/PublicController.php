@@ -26,13 +26,17 @@ class PublicController extends AppController
         $this->VolunteerSignups = $this->fetchTable('VolunteerSignups');
         $this->ContactMessages = $this->fetchTable('ContactMessages');
         
+        // Load Users table for profile
+        $this->Users = $this->fetchTable('Users');
+        
         // Allow all public actions to be accessed without authentication
         $this->Authentication->allowUnauthenticated([
             'home',
             'volunteerRegister',
             'organisationRegister',
             'contact',
-            'publicEvents'
+            'publicEvents',
+            'viewEvent'
         ]);
     }
 
@@ -122,5 +126,65 @@ class PublicController extends AppController
             ->order(['event_date' => 'ASC'])
             ->all();
         $this->set(compact('events'));
+    }
+
+    // 👁️ Xem chi tiết sự kiện (cho public/volunteer)
+    public function viewEvent($id = null)
+    {
+        // Update expired events before loading the event
+        $this->Events->updateExpiredEvents();
+        
+        if (!$id) {
+            $this->Flash->error(__('Invalid event ID.'));
+            return $this->redirect(['action' => 'publicEvents']);
+        }
+
+        $event = $this->Events->find()
+            ->contain(['Organisations'])
+            ->where(['Events.id' => $id])
+            ->first();
+
+        if (!$event) {
+            $this->Flash->error(__('Event not found.'));
+            return $this->redirect(['action' => 'publicEvents']);
+        }
+
+        $this->set(compact('event'));
+    }
+
+    // 👤 Xem profile (cho public/volunteer)
+    public function profile($id = null)
+    {
+        // Get current user
+        $identity = $this->Authentication->getIdentity();
+        $currentUserId = null;
+        
+        if ($identity) {
+            if (is_object($identity)) {
+                $currentUserId = $identity->id ?? null;
+            } elseif (is_array($identity)) {
+                $currentUserId = $identity['id'] ?? $identity['data']['id'] ?? null;
+            }
+        }
+        
+        // If no ID provided, use current user's ID
+        if (!$id && $currentUserId) {
+            $id = $currentUserId;
+        }
+        
+        // If still no ID, redirect to home
+        if (!$id) {
+            $this->Flash->error(__('Please login to view your profile.'));
+            return $this->redirect(['action' => 'home']);
+        }
+        
+        // Users can only view their own profile (unless admin/assistant, but they use Users::profile)
+        if ($currentUserId && $currentUserId !== $id) {
+            $this->Flash->error(__('You can only view your own profile.'));
+            return $this->redirect(['action' => 'profile', $currentUserId]);
+        }
+        
+        $user = $this->Users->get($id, contain: ['Volunteers']);
+        $this->set(compact('user'));
     }
 }

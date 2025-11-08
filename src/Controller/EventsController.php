@@ -39,10 +39,13 @@ class EventsController extends AppController
     }
 
     /**
-     * View method
+     * View method - Only for admin and assistant
      */
     public function view($id = null)
     {
+        // Only admin and assistant can access
+        $this->requireRole(['admin', 'assistant']);
+        
         // Update expired events before loading the event
         $this->Events->updateExpiredEvents();
         
