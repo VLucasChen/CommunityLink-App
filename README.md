@@ -53,48 +53,48 @@ Volunteer accounts are not pre-created in the database. To create a volunteer ac
 
 **HUANG YICHEN (35860537):**
 
-### Task 1: Database Schema Design and CakePHP Compliance
-### Task 2: Authentication System Implementation
-### Task 3: Public-Facing Pages( Home Page, Contact Us Page, Volunteer Signup Page, Organisation Registration Page)
-### Task 4: Admin Dashboard
-### Task 5: Events Management
-### Task 6: Volunteers Management
-### Task 7: Volunteer Signups Management
-### Task 8: Organisations Management
-### Task 9: Users Management
-### Task 10: Contact Messages Management
-### Task 11: Search and Filter Functionality
-### Task 12: Pagination Implementation
-### Task 13: File Upload Handling
-### Task 14: Email Notifications
-### Task 15: Validation and Error Handling
-### Task 16: UI/UX Improvements and Virtual Fields
-### Task 17: CakePHP Configuration
-### Task 18: Branding Customization
-### Task 19: Code Quality and Best Practices
+Task 1: Database Schema Design and CakePHP Compliance
+Task 2: Authentication System Implementation
+Task 3: Public-Facing Pages( Home Page, Contact Us Page, Volunteer Signup Page, Organisation Registration Page)
+Task 4: Admin Dashboard
+Task 5: Events Management
+Task 6: Volunteers Management
+Task 7: Volunteer Signups Management
+Task 8: Organisations Management
+Task 9: Users Management
+Task 10: Contact Messages Management
+Task 11: Search and Filter Functionality
+Task 12: Pagination Implementation
+Task 13: File Upload Handling
+Task 14: Email Notifications
+Task 15: Validation and Error Handling
+Task 16: UI/UX Improvements and Virtual Fields
+Task 17: CakePHP Configuration
+Task 18: Branding Customization
+Task 19: Code Quality and Best Practices
 
 HUANG YICHEN agrees with the work breakdown agreement. 07/11/2025
 
 ---
 
-- **LE HOANG (33603294):** 
+**LE HOANG (33603294):** 
 
-### Task 1: Users Management
-### Task 2: Contact Messages Management
-### Task 3: Search and Filter Functionality
-### Task 4: Pagination Implementation
-### Task 5: File Upload Handling
-### Task 6: Email Notifications
-### Task 7: Validation and Error Handling
-### Task 8: UI/UX Improvements and Virtual Fields
-### Task 9: Pagination Implementation
-### Task 10: File Upload Handling
-### Task 11: Email Notifications
-### Task 12: Validation and Error Handling
-### Task 13: UI/UX Improvements and Virtual Fields
-### Task 14: CakePHP Configuration
-### Task 15: Branding Customization
-### Task 16: Code Quality and Best Practices
+Task 1: Users Management
+Task 2: Contact Messages Management
+Task 3: Search and Filter Functionality
+Task 4: Pagination Implementation
+Task 5: File Upload Handling
+Task 6: Email Notifications
+Task 7: Validation and Error Handling
+Task 8: UI/UX Improvements and Virtual Fields
+Task 9: Pagination Implementation
+Task 10: File Upload Handling
+Task 11: Email Notifications
+Task 12: Validation and Error Handling
+Task 13: UI/UX Improvements and Virtual Fields
+Task 14: CakePHP Configuration
+Task 15: Branding Customization
+Task 16: Code Quality and Best Practices
 
 LE HOANG agrees with the work breakdown agreement. 07/11/2025
 
@@ -252,23 +252,6 @@ bin/cake server -p 8765
 - **Models:** `src/Model/Table/`
 - **Controllers:** `src/Controller/`
 - **Views:** `templates/`
-
----
-
-## Notes
-
-- Debug mode is **disabled** in `app_local.php` for production
-- Australian locale (`en_AU`) and timezone (`Australia/Melbourne`) configured
-- All CakePHP branding removed, replaced with CommunityLink branding
-- Server-side pagination implemented (no client-side DataTables)
-- All forms use CakePHP FormHelper for best practices
-- **Email Notifications:** All public form submissions (Contact, Volunteer Signup, Organisation Registration) send email notifications to `admin@communitylink.com` using CakePHP Mailer
-- **CakePHP Compliance:** All code follows CakePHP best practices:
-  - No direct SQL queries (uses ORM)
-  - No raw PHP superglobals (uses Request object)
-  - No raw PHP redirects (uses `$this->redirect()`)
-  - No raw PHP email (uses CakePHP Mailer)
-  - All templates use CakePHP helpers (FormHelper, HtmlHelper, UrlHelper)
 
 ---
 
