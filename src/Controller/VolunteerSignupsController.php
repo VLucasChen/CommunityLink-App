@@ -17,10 +17,24 @@ class VolunteerSignupsController extends AppController
      */
     public function index()
     {
+        $search = $this->request->getQuery('search');
         $query = $this->VolunteerSignups->find();
+        
+        if ($search) {
+            $query->where([
+                'OR' => [
+                    'first_name LIKE' => '%' . $search . '%',
+                    'last_name LIKE' => '%' . $search . '%',
+                    'email LIKE' => '%' . $search . '%',
+                    'phone LIKE' => '%' . $search . '%',
+                    'status LIKE' => '%' . $search . '%',
+                ]
+            ]);
+        }
+        
         $volunteerSignups = $this->paginate($query);
 
-        $this->set(compact('volunteerSignups'));
+        $this->set(compact('volunteerSignups', 'search'));
     }
 
     /**

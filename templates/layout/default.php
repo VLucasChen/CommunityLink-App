@@ -28,7 +28,7 @@ $cakeDescription = 'CommunityLink';
 <?php
 $isLoginPage = $this->request->getParam('controller') === 'Users' && $this->request->getParam('action') === 'login';
 ?>
-<body class="bg-light <?= $isLoginPage ? 'login-page' : '' ?>">
+<body class="bg-light <?= $isLoginPage ? 'login-page' : '' ?>" style="display: flex; flex-direction: column; min-height: 100vh;">
 
     <?php
     $currentController = $this->request->getParam('controller');
@@ -714,7 +714,7 @@ $isLoginPage = $this->request->getParam('controller') === 'Users' && $this->requ
     <?php endif; ?>
 
     <!-- Main Content -->
-    <main class="<?= $isLoginPage ? '' : 'py-4' ?>">
+    <main class="<?= $isLoginPage ? '' : 'py-4' ?>" style="flex: 1;">
         <?php if (!$isLoginPage): ?>
         <div class="container">
             <?= $this->Flash->render() ?>
@@ -728,7 +728,7 @@ $isLoginPage = $this->request->getParam('controller') === 'Users' && $this->requ
 
     <?php if (!$isLoginPage): ?>
     <!-- Footer -->
-    <footer class="bg-dark text-white-50 py-4 mt-5">
+    <footer class="bg-dark text-white-50 py-4" style="margin-top: auto;">
         <div class="container">
             <div class="row">
                 <div class="col-md-6 mb-3 mb-md-0">
