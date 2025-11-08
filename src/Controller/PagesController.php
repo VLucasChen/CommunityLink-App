@@ -28,6 +28,11 @@ use Cake\View\Exception\MissingTemplateException;
  * This controller will render views from templates/Pages/
  *
  * @link https://book.cakephp.org/5/en/controllers/pages-controller.html
+ * 
+ * @property \App\Model\Table\VolunteersTable $Volunteers
+ * @property \App\Model\Table\OrganisationsTable $Organisations
+ * @property \App\Model\Table\EventsTable $Events
+ * @property \App\Model\Table\VolunteerEventsTable $VolunteerEvents
  */
 class PagesController extends AppController
 {
@@ -52,7 +57,114 @@ class PagesController extends AppController
     {
         // Get current user
         $user = $this->Authentication->getIdentity();
-        $this->set(compact('user'));
+        
+        // Load tables
+        $this->Volunteers = $this->fetchTable('Volunteers');
+        $this->Organisations = $this->fetchTable('Organisations');
+        $this->Events = $this->fetchTable('Events');
+        $this->VolunteerEvents = $this->fetchTable('VolunteerEvents');
+        
+        // 1. Top 10 Volunteers (based on number of events participated)
+        $topVolunteersQuery = $this->VolunteerEvents->find()
+            ->select([
+                'volunteer_id',
+                'event_count' => 'COUNT(VolunteerEvents.id)'
+            ])
+            ->group(['VolunteerEvents.volunteer_id'])
+            ->order(['event_count' => 'DESC'])
+            ->limit(10);
+        
+        // Format top volunteers data
+        $topVolunteersList = [];
+        foreach ($topVolunteersQuery as $item) {
+            if ($item->volunteer_id) {
+                try {
+                    $volunteer = $this->Volunteers->get($item->volunteer_id);
+                    $topVolunteersList[] = [
+                        'volunteer' => $volunteer,
+                        'event_count' => $item->event_count
+                    ];
+                } catch (\Exception $e) {
+                    // Skip if volunteer not found
+                    continue;
+                }
+            }
+        }
+        
+        // 2. Top 10 Partners (based on number of events organized)
+        $topPartnersQuery = $this->Events->find()
+            ->select([
+                'organisation_id',
+                'event_count' => 'COUNT(Events.id)'
+            ])
+            ->where(['Events.organisation_id IS NOT' => null])
+            ->group(['Events.organisation_id'])
+            ->order(['event_count' => 'DESC'])
+            ->limit(10);
+        
+        // Format top partners data
+        $topPartnersList = [];
+        foreach ($topPartnersQuery as $item) {
+            if ($item->organisation_id) {
+                try {
+                    $organisation = $this->Organisations->get($item->organisation_id);
+                    $topPartnersList[] = [
+                        'organisation' => $organisation,
+                        'event_count' => $item->event_count
+                    ];
+                } catch (\Exception $e) {
+                    // Skip if organisation not found
+                    continue;
+                }
+            }
+        }
+        
+        // 3. Volunteers categorized by skills
+        $allVolunteers = $this->Volunteers->find()->all();
+        $skillsDistribution = [];
+        foreach ($allVolunteers as $volunteer) {
+            if (!empty($volunteer->skills)) {
+                // Split skills by comma or newline
+                $skills = preg_split('/[,\n\r]+/', $volunteer->skills);
+                foreach ($skills as $skill) {
+                    $skill = trim($skill);
+                    if (!empty($skill)) {
+                        if (!isset($skillsDistribution[$skill])) {
+                            $skillsDistribution[$skill] = 0;
+                        }
+                        $skillsDistribution[$skill]++;
+                    }
+                }
+            }
+        }
+        arsort($skillsDistribution);
+        $skillsDistribution = array_slice($skillsDistribution, 0, 10, true); // Top 10 skills
+        
+        // 4. Events scheduled for next month (counted by status)
+        $nextMonthStart = new \DateTime('first day of next month');
+        $nextMonthEnd = new \DateTime('last day of next month');
+        
+        $nextMonthEvents = $this->Events->find()
+            ->where([
+                'Events.event_date >=' => $nextMonthStart->format('Y-m-d'),
+                'Events.event_date <=' => $nextMonthEnd->format('Y-m-d')
+            ])
+            ->all();
+        
+        $eventsByStatus = [
+            'Preparing' => 0,
+            'Ready to go' => 0,
+            'Archive' => 0,
+            'Failed' => 0
+        ];
+        
+        foreach ($nextMonthEvents as $event) {
+            if (isset($eventsByStatus[$event->status])) {
+                $eventsByStatus[$event->status]++;
+            }
+        }
+        
+        $this->set(compact('user', 'topVolunteersList', 'topPartnersList', 'skillsDistribution', 'eventsByStatus'));
         return null;
     }
 
