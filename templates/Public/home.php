@@ -396,7 +396,7 @@
                 </div>
             </div>
         </div>
-    </div>
+</div>
 </section>
 
 <!-- Features Section -->
@@ -479,11 +479,11 @@
                                     ['controller' => 'Public', 'action' => 'publicEvents'],
                                     ['class' => 'event-link', 'escape' => false]
                                 ) ?>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
+      </div>
+    </div>
+  </div>
+<?php endforeach; ?>
+</div>
             <div class="text-center mt-5">
                 <?= $this->Html->link(
                     'View All Events <i class="bi bi-arrow-right ms-2"></i>',
