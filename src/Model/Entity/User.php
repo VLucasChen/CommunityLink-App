@@ -4,88 +4,18 @@ declare(strict_types=1);
 namespace App\Model\Entity;
 
 use Cake\ORM\Entity;
-use Authentication\PasswordHasher\DefaultPasswordHasher;
 
-/**
- * User Entity
- *
- * @property int $user_id
- * @property string $username
- * @property string $password
- * @property string $role
- * @property int|null $volunteer_id
- * @property \Cake\I18n\DateTime|null $created_at
- *
- * @property \App\Model\Entity\Volunteer $volunteer
- */
 class User extends Entity
 {
-    /**
-     * Fields that can be mass assigned using newEntity() or patchEntity().
-     *
-     * Note that when '*' is set to true, this allows all unspecified fields to
-     * be mass assigned. For security purposes, it is advised to set '*' to false
-     * (or remove it), and explicitly make individual fields accessible as needed.
-     *
-     * @var array<string, bool>
-     */
     protected array $_accessible = [
         'username' => true,
         'password' => true,
         'role' => true,
         'volunteer_id' => true,
-        'created_at' => true,
+        'created' => true,
+        'modified' => true,
         'volunteer' => true,
     ];
 
-    /**
-     * Fields that are excluded from JSON versions of the entity.
-     *
-     * @var array<string>
-     */
-    protected array $_hidden = [
-        'password',
-    ];
-
-    /**
-     * Hash password before saving
-     *
-     * @param string $password
-     * @return string
-     */
-    protected function _setPassword(string $password): string
-    {
-        $hasher = new DefaultPasswordHasher();
-        return $hasher->hash($password);
-    }
-
-    /**
-     * Check if user is admin
-     *
-     * @return bool
-     */
-    public function isAdmin(): bool
-    {
-        return $this->role === 'admin';
-    }
-
-    /**
-     * Check if user is assistant
-     *
-     * @return bool
-     */
-    public function isAssistant(): bool
-    {
-        return $this->role === 'assistant';
-    }
-
-    /**
-     * Check if user is volunteer
-     *
-     * @return bool
-     */
-    public function isVolunteer(): bool
-    {
-        return $this->role === 'volunteer';
-    }
+    protected array $_hidden = ['password'];
 }

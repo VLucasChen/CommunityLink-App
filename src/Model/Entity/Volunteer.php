@@ -5,36 +5,30 @@ namespace App\Model\Entity;
 
 use Cake\ORM\Entity;
 
-/**
- * Volunteer Entity
- *
- * @property int $volunteer_id
- * @property string $full_name
- * @property string $email
- * @property string $phone
- * @property string $skills
- * @property string $profile_picture
- * @property string $status
- * @property \Cake\I18n\DateTime|null $created_at
- */
 class Volunteer extends Entity
 {
-    /**
-     * Fields that can be mass assigned using newEntity() or patchEntity().
-     *
-     * Note that when '*' is set to true, this allows all unspecified fields to
-     * be mass assigned. For security purposes, it is advised to set '*' to false
-     * (or remove it), and explicitly make individual fields accessible as needed.
-     *
-     * @var array<string, bool>
-     */
     protected array $_accessible = [
-        'full_name' => true,
+        'first_name' => true,
+        'last_name' => true,
         'email' => true,
         'phone' => true,
         'skills' => true,
         'profile_picture' => true,
+        'documents' => true,
+        'availability' => true,
+        'self_intro' => true,
+        'date_submitted' => true,
         'status' => true,
-        'created_at' => true,
+        'created' => true,
+        'modified' => true,
+        'events' => true,
+        'users' => true,
     ];
+
+    protected $_virtual = ['full_name'];
+
+    protected function _getFullName(): string
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
+    }
 }
