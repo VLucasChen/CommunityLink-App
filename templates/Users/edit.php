@@ -199,6 +199,17 @@
         gap: 0.5rem;
     }
 
+    .form-select:disabled {
+        background: var(--m3-surface-variant);
+        color: var(--m3-outline);
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .input-wrapper.disabled {
+        opacity: 0.6;
+    }
+
     .role-badge {
         display: inline-flex;
         align-items: center;
@@ -357,7 +368,7 @@
                 Volunteer Association
             </h3>
             
-            <div class="input-wrapper">
+            <div class="input-wrapper" id="volunteer-association-wrapper">
                 <label for="volunteer_id" style="display: flex; align-items: center; gap: 0.75rem; font-weight: 600; color: var(--m3-on-surface); margin-bottom: 0.75rem;">
                     <i class="bi bi-person-circle" style="color: var(--m3-primary);"></i>
                     Associated Volunteer
@@ -373,7 +384,7 @@
                         <?= $this->Form->error('volunteer_id') ?>
                     </div>
                 <?php endif; ?>
-                <div class="password-hint">
+                <div class="password-hint" id="volunteer-hint">
                     <i class="bi bi-info-circle"></i>
                     Link this user account to a volunteer profile (optional)
                 </div>
@@ -403,3 +414,33 @@
     'actionLink' => ['action' => 'index'],
     'actionText' => 'View List'
 ]) ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.getElementById('role');
+    const volunteerSelect = document.getElementById('volunteer_id');
+    const volunteerWrapper = document.getElementById('volunteer-association-wrapper');
+    const volunteerHint = document.getElementById('volunteer-hint');
+
+    function toggleVolunteerField() {
+        if (roleSelect.value === 'admin') {
+            volunteerSelect.disabled = true;
+            volunteerSelect.value = '';
+            volunteerWrapper.classList.add('disabled');
+            volunteerHint.innerHTML = '<i class="bi bi-info-circle"></i> Admin users cannot be associated with volunteers';
+            volunteerHint.style.color = 'var(--m3-outline)';
+        } else {
+            volunteerSelect.disabled = false;
+            volunteerWrapper.classList.remove('disabled');
+            volunteerHint.innerHTML = '<i class="bi bi-info-circle"></i> Link this user account to a volunteer profile (optional)';
+            volunteerHint.style.color = 'var(--m3-outline)';
+        }
+    }
+
+    // Initial check
+    toggleVolunteerField();
+
+    // Listen for role changes
+    roleSelect.addEventListener('change', toggleVolunteerField);
+});
+</script>

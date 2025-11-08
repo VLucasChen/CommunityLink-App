@@ -54,13 +54,21 @@ class UsersController extends AppController
     {
         $user = $this->Users->newEmptyEntity();
         if ($this->request->is('post')) {
-            $user = $this->Users->patchEntity($user, $this->request->getData());
+            $data = $this->request->getData();
+            
+            // If role is admin, remove volunteer_id
+            if (isset($data['role']) && $data['role'] === 'admin') {
+                $data['volunteer_id'] = null;
+            }
+            
+            $user = $this->Users->patchEntity($user, $data);
             if ($this->Users->save($user)) {
                 $this->Flash->success(__('The user has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
+                // Reload the entity to get saved data
+                $user = $this->Users->get($user->id, contain: []);
+            } else {
+                $this->Flash->error(__('The user could not be saved. Please, try again.'));
             }
-            $this->Flash->error(__('The user could not be saved. Please, try again.'));
         }
         $volunteers = $this->Users->Volunteers->find('list', limit: 200)->all();
         $this->set(compact('user', 'volunteers'));
@@ -82,6 +90,11 @@ class UsersController extends AppController
             // If password is empty, remove it from data to keep current password
             if (empty($data['password'])) {
                 unset($data['password']);
+            }
+            
+            // If role is admin, remove volunteer_id
+            if (isset($data['role']) && $data['role'] === 'admin') {
+                $data['volunteer_id'] = null;
             }
             
             $user = $this->Users->patchEntity($user, $data);
