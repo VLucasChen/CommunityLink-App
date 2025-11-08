@@ -71,6 +71,18 @@ return function (RouteBuilder $routes): void {
         ]);
 
         /**
+         * ✅ FILES ROUTE
+         * Serve uploaded files (profile pictures, documents, etc.)
+         * Format: /files/{category}/{type}/{filename}
+         */
+        $builder->connect('/files/{category}/{type}/{filename}', [
+            'controller' => 'Files',
+            'action' => 'serve'
+        ], [
+            'pass' => ['category', 'type', 'filename']
+        ]);
+
+        /**
          * ✅ FALLBACK ROUTES
          * Enable standard CRUD access for all baked controllers.
          * Example: /volunteers, /events/edit/1

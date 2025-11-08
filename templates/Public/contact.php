@@ -343,3 +343,9 @@
         </div>
     </div>
 </div>
+
+<?= $this->element('success_modal', [
+    'modalId' => 'contactSuccessModal',
+    'title' => 'Message Sent!',
+    'message' => 'Your message has been sent successfully. We will get back to you soon!'
+]) ?>

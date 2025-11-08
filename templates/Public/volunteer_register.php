@@ -752,3 +752,9 @@ document.addEventListener('DOMContentLoaded', function() {
     setupFileUpload('documents', 'documentsArea', 'documentsPreview', false);
 });
 </script>
+
+<?= $this->element('success_modal', [
+    'modalId' => 'volunteerSuccessModal',
+    'title' => 'Registration Successful!',
+    'message' => 'Thank you for joining CommunityLink. Your registration has been submitted successfully!'
+]) ?>

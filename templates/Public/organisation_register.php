@@ -344,3 +344,9 @@
         </div>
     </div>
 </div>
+
+<?= $this->element('success_modal', [
+    'modalId' => 'organisationSuccessModal',
+    'title' => 'Registration Successful!',
+    'message' => 'Your organisation has been registered successfully. We will review your application and get back to you soon!'
+]) ?>

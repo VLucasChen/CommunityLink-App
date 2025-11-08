@@ -400,9 +400,13 @@
                     <i class="bi bi-image"></i>
                     <div class="file-info">
                         <div class="file-name">Profile Picture</div>
+                        <?php
+                        // Extract just the filename from the path
+                        $profilePictureFilename = basename($volunteerSignup->profile_picture);
+                        ?>
                         <?= $this->Html->link(
                             'View/Download',
-                            '/files/volunteer_signups/profile_picture/' . h($volunteerSignup->profile_picture),
+                            '/files/volunteer_signups/profile_picture/' . h($profilePictureFilename),
                             ['class' => 'file-link', 'target' => '_blank']
                         ) ?>
                     </div>
@@ -418,9 +422,13 @@
                     <i class="bi bi-file-earmark-text"></i>
                     <div class="file-info">
                         <div class="file-name">Attached Documents</div>
+                        <?php
+                        // Extract just the filename from the path
+                        $documentsFilename = basename($volunteerSignup->documents);
+                        ?>
                         <?= $this->Html->link(
                             'View/Download',
-                            '/files/volunteer_signups/documents/' . h($volunteerSignup->documents),
+                            '/files/volunteer_signups/documents/' . h($documentsFilename),
                             ['class' => 'file-link', 'target' => '_blank']
                         ) ?>
                     </div>
