@@ -19,10 +19,10 @@ class EventsController extends AppController
     {
         $this->requireLogin();
         $this->requireAdmin();
-        
+
         // Disable layout for admin pages (has full HTML with sidebar like A3)
         $this->viewBuilder()->setLayout(null);
-        
+
         // Auto-update event status when date passes
         // Ready to go → Archive, Preparing → Failed
         $today = date('Y-m-d');
@@ -31,11 +31,11 @@ class EventsController extends AppController
                 'Events.event_date <' => $today,
                 'OR' => [
                     ['Events.status' => 'Ready to go'],
-                    ['Events.status' => 'Preparing']
-                ]
+                    ['Events.status' => 'Preparing'],
+                ],
             ])
             ->toArray();
-        
+
         foreach ($pastEvents as $event) {
             if ($event->status === 'Ready to go') {
                 $event->status = 'Archive';
@@ -44,7 +44,7 @@ class EventsController extends AppController
             }
             $this->Events->save($event);
         }
-        
+
         $query = $this->Events->find()
             ->contain(['Organisations', 'Volunteers']);
 
@@ -71,7 +71,7 @@ class EventsController extends AppController
         $event_date = $this->request->getQuery('event_date');
         $date_from = $this->request->getQuery('date_from');
         $date_to = $this->request->getQuery('date_to');
-        
+
         if ($event_date) {
             // Specific date search (A5 requirement: "10 October 2025" as event date)
             $query->where(['Events.event_date' => $event_date]);
@@ -91,7 +91,7 @@ class EventsController extends AppController
         // Server-side pagination
         $events = $this->paginate($query, [
             'limit' => 10,
-            'sortableFields' => ['Events.title', 'Events.event_date', 'Events.location', 'Organisations.org_name']
+            'sortableFields' => ['Events.title', 'Events.event_date', 'Events.location', 'Organisations.org_name'],
         ]);
 
         $this->set(compact('events', 'search', 'skills', 'status', 'event_date', 'date_from', 'date_to'));
@@ -104,28 +104,28 @@ class EventsController extends AppController
      * @return \Cake\Http\Response|null|void Renders view
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function view($id = null)
+    public function view(?string $id = null)
     {
         $this->requireLogin();
         $this->requireAdmin();
-        
+
         // Disable layout for admin pages (has full HTML with sidebar like A3)
         $this->viewBuilder()->setLayout(null);
-        
+
         $event = $this->Events->get($id, contain: ['Organisations', 'Volunteers']);
-        
+
         // Get assigned volunteer IDs for display (A3 logic)
         $assignedVolunteerIds = [];
         foreach ($event->volunteers ?? [] as $volunteer) {
             $assignedVolunteerIds[] = $volunteer->id;
         }
-        
+
         // Get all volunteers with their details for display (A3 logic)
         $volunteersTable = $this->fetchTable('Volunteers');
         $volunteers = $volunteersTable->find('all', [
-            'order' => ['first_name' => 'ASC']
+            'order' => ['first_name' => 'ASC'],
         ])->toArray();
-        
+
         $this->set(compact('event', 'assignedVolunteerIds', 'volunteers'));
     }
 
@@ -138,20 +138,20 @@ class EventsController extends AppController
     {
         $this->requireLogin();
         $this->requireAdmin();
-        
+
         // Disable layout for admin pages (has full HTML with sidebar like A3)
         $this->viewBuilder()->setLayout(null);
-        
+
         $event = $this->Events->newEmptyEntity();
         if ($this->request->is('post')) {
             $data = $this->request->getData();
-            
+
             // Handle volunteer assignments (A3 logic preserved)
             $volunteerIds = $data['volunteer_ids'] ?? [];
             unset($data['volunteer_ids']);
-            
+
             $event = $this->Events->patchEntity($event, $data);
-            
+
             if ($this->Events->save($event)) {
                 // Handle volunteer assignments (A3 logic)
                 if (!empty($volunteerIds)) {
@@ -163,7 +163,7 @@ class EventsController extends AppController
                         $volunteerEventsTable->save($volunteerEvent);
                     }
                 }
-                
+
                 $this->Flash->success(__('Event added successfully!'));
 
                 return $this->redirect(['action' => 'index']);
@@ -185,14 +185,14 @@ class EventsController extends AppController
             'keyField' => 'id',
             'valueField' => function ($org) {
                 return $org->org_name . ' - ' . $org->contact_person_full_name . ' (' . $org->industry . ')';
-            }
+            },
         ])->order(['org_name' => 'ASC'])->all();
-        
+
         $volunteersTable = $this->fetchTable('Volunteers');
         $volunteers = $volunteersTable->find('all', [
-            'order' => ['first_name' => 'ASC']
+            'order' => ['first_name' => 'ASC'],
         ])->toArray();
-        
+
         $this->set(compact('event', 'organisations', 'volunteers'));
     }
 
@@ -203,36 +203,36 @@ class EventsController extends AppController
      * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function edit($id = null)
+    public function edit(?string $id = null)
     {
         $this->requireLogin();
         $this->requireAdmin();
-        
+
         // Disable layout for admin pages (has full HTML with sidebar like A3)
         $this->viewBuilder()->setLayout(null);
-        
+
         $event = $this->Events->get($id, contain: ['Volunteers']);
-        
+
         // Get currently assigned volunteer IDs (A3 logic)
         $assignedVolunteerIds = [];
         foreach ($event->volunteers ?? [] as $volunteer) {
             $assignedVolunteerIds[] = $volunteer->id;
         }
-        
+
         if ($this->request->is(['patch', 'post', 'put'])) {
             $data = $this->request->getData();
-            
+
             // Handle volunteer assignments (A3 logic preserved)
             $volunteerIds = $data['volunteer_ids'] ?? [];
             unset($data['volunteer_ids']);
-            
+
             $event = $this->Events->patchEntity($event, $data);
-            
+
             if ($this->Events->save($event)) {
                 // Remove existing assignments and add new ones (A3 logic)
                 $volunteerEventsTable = $this->fetchTable('VolunteerEvents');
                 $volunteerEventsTable->deleteAll(['event_id' => $event->id]);
-                
+
                 if (!empty($volunteerIds)) {
                     foreach ($volunteerIds as $volunteerId) {
                         $volunteerEvent = $volunteerEventsTable->newEmptyEntity();
@@ -241,7 +241,7 @@ class EventsController extends AppController
                         $volunteerEventsTable->save($volunteerEvent);
                     }
                 }
-                
+
                 $this->Flash->success(__('Event updated successfully!'));
 
                 return $this->redirect(['action' => 'index']);
@@ -263,14 +263,14 @@ class EventsController extends AppController
             'keyField' => 'id',
             'valueField' => function ($org) {
                 return $org->org_name . ' - ' . $org->contact_person_full_name . ' (' . $org->industry . ')';
-            }
+            },
         ])->order(['org_name' => 'ASC'])->all();
-        
+
         $volunteersTable = $this->fetchTable('Volunteers');
         $volunteers = $volunteersTable->find('all', [
-            'order' => ['first_name' => 'ASC']
+            'order' => ['first_name' => 'ASC'],
         ])->toArray();
-        
+
         $this->set(compact('event', 'organisations', 'volunteers', 'assignedVolunteerIds'));
     }
 
@@ -281,7 +281,7 @@ class EventsController extends AppController
      * @return \Cake\Http\Response|null Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function delete($id = null)
+    public function delete(?string $id = null)
     {
         $this->requireLogin();
         $this->requireAdmin();

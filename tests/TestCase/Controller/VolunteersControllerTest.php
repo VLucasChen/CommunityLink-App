@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Test\TestCase\Controller;
 
-use App\Controller\VolunteersController;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
@@ -21,9 +20,7 @@ class VolunteersControllerTest extends TestCase
      *
      * @var array<string>
      */
-    protected array $fixtures = [
-        'app.Volunteers',
-    ];
+    protected array $fixtures = [];
 
     /**
      * Test index method

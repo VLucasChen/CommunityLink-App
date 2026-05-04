@@ -1,0 +1,136 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Access to an undefined property App\\\\Controller\\\\AppController\\:\\:\\$Authentication\\.$#"
+			count: 4
+			path: src/Controller/AppController.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Model\\\\Entity\\\\ContactMessage\\:\\:\\$email\\.$#"
+			count: 3
+			path: src/Controller/ContactMessagesController.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Model\\\\Entity\\\\ContactMessage\\:\\:\\$first_name\\.$#"
+			count: 2
+			path: src/Controller/ContactMessagesController.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Model\\\\Entity\\\\ContactMessage\\:\\:\\$is_replied\\.$#"
+			count: 2
+			path: src/Controller/ContactMessagesController.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Model\\\\Entity\\\\ContactMessage\\:\\:\\$last_name\\.$#"
+			count: 1
+			path: src/Controller/ContactMessagesController.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Model\\\\Entity\\\\ContactMessage\\:\\:\\$message\\.$#"
+			count: 1
+			path: src/Controller/ContactMessagesController.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Model\\\\Entity\\\\ContactMessage\\:\\:\\$phone\\.$#"
+			count: 1
+			path: src/Controller/ContactMessagesController.php
+
+		-
+			message: "#^Access to an undefined property Cake\\\\Datasource\\\\EntityInterface\\:\\:\\$event_id\\.$#"
+			count: 2
+			path: src/Controller/EventsController.php
+
+		-
+			message: "#^Access to an undefined property Cake\\\\Datasource\\\\EntityInterface\\:\\:\\$volunteer_id\\.$#"
+			count: 2
+			path: src/Controller/EventsController.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Model\\\\Entity\\\\ContactMessage\\:\\:\\$first_name\\.$#"
+			count: 1
+			path: src/Controller/PublicController.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Model\\\\Entity\\\\ContactMessage\\:\\:\\$message\\.$#"
+			count: 1
+			path: src/Controller/PublicController.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Controller\\\\UsersController\\:\\:\\$Authentication\\.$#"
+			count: 6
+			path: src/Controller/UsersController.php
+
+		-
+			message: "#^Negated boolean expression is always true\\.$#"
+			count: 1
+			path: src/Controller/UsersController.php
+
+		-
+			message: "#^Access to an undefined property Cake\\\\Datasource\\\\EntityInterface\\:\\:\\$availability\\.$#"
+			count: 1
+			path: src/Controller/VolunteerSignupsController.php
+
+		-
+			message: "#^Access to an undefined property Cake\\\\Datasource\\\\EntityInterface\\:\\:\\$date_submitted\\.$#"
+			count: 1
+			path: src/Controller/VolunteerSignupsController.php
+
+		-
+			message: "#^Access to an undefined property Cake\\\\Datasource\\\\EntityInterface\\:\\:\\$documents\\.$#"
+			count: 1
+			path: src/Controller/VolunteerSignupsController.php
+
+		-
+			message: "#^Access to an undefined property Cake\\\\Datasource\\\\EntityInterface\\:\\:\\$email\\.$#"
+			count: 1
+			path: src/Controller/VolunteerSignupsController.php
+
+		-
+			message: "#^Access to an undefined property Cake\\\\Datasource\\\\EntityInterface\\:\\:\\$first_name\\.$#"
+			count: 1
+			path: src/Controller/VolunteerSignupsController.php
+
+		-
+			message: "#^Access to an undefined property Cake\\\\Datasource\\\\EntityInterface\\:\\:\\$last_name\\.$#"
+			count: 1
+			path: src/Controller/VolunteerSignupsController.php
+
+		-
+			message: "#^Access to an undefined property Cake\\\\Datasource\\\\EntityInterface\\:\\:\\$phone\\.$#"
+			count: 1
+			path: src/Controller/VolunteerSignupsController.php
+
+		-
+			message: "#^Access to an undefined property Cake\\\\Datasource\\\\EntityInterface\\:\\:\\$profile_picture\\.$#"
+			count: 1
+			path: src/Controller/VolunteerSignupsController.php
+
+		-
+			message: "#^Access to an undefined property Cake\\\\Datasource\\\\EntityInterface\\:\\:\\$self_intro\\.$#"
+			count: 1
+			path: src/Controller/VolunteerSignupsController.php
+
+		-
+			message: "#^Access to an undefined property Cake\\\\Datasource\\\\EntityInterface\\:\\:\\$skills\\.$#"
+			count: 1
+			path: src/Controller/VolunteerSignupsController.php
+
+		-
+			message: "#^Access to an undefined property Cake\\\\Datasource\\\\EntityInterface\\:\\:\\$status\\.$#"
+			count: 1
+			path: src/Controller/VolunteerSignupsController.php
+
+		-
+			message: "#^Parameter \\#1 \\$path of function pathinfo expects string, string\\|null given\\.$#"
+			count: 2
+			path: src/Controller/VolunteersController.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Model\\\\Entity\\\\ContactMessage\\:\\:\\$first_name\\.$#"
+			count: 1
+			path: src/Model/Entity/ContactMessage.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Model\\\\Entity\\\\ContactMessage\\:\\:\\$last_name\\.$#"
+			count: 1
+			path: src/Model/Entity/ContactMessage.php

@@ -20,6 +20,11 @@ class ContactMessage extends Entity
 
     protected array $_virtual = ['full_name'];
 
+    /**
+     * Virtual field: full display name.
+     *
+     * @return string
+     */
     protected function _getFullName(): string
     {
         return trim($this->first_name . ' ' . $this->last_name);

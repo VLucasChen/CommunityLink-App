@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
-use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
@@ -12,7 +10,6 @@ use Cake\Validation\Validator;
  * Organisations Model
  *
  * @property \App\Model\Table\EventsTable&\Cake\ORM\Association\HasMany $Events
- *
  * @method \App\Model\Entity\Organisation newEmptyEntity()
  * @method \App\Model\Entity\Organisation newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\Organisation> newEntities(array $data, array $options = [])
@@ -26,7 +23,6 @@ use Cake\Validation\Validator;
  * @method iterable<\App\Model\Entity\Organisation>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Organisation> saveManyOrFail(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Organisation>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Organisation>|false deleteMany(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Organisation>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Organisation> deleteManyOrFail(iterable $entities, array $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class OrganisationsTable extends Table
@@ -95,9 +91,10 @@ class OrganisationsTable extends Table
                     $pattern = '/^0[2-478][0-9]{8}$/';
                     // Remove spaces, dashes, and parentheses for validation
                     $cleaned = preg_replace('/[\s\-\(\)]/', '', $value);
+
                     return (bool)preg_match($pattern, $cleaned);
                 },
-                'message' => 'Please enter a valid Australian phone number in 04XX format (e.g., 0412 345 678).'
+                'message' => 'Please enter a valid Australian phone number in 04XX format (e.g., 0412 345 678).',
             ]);
 
         $validator

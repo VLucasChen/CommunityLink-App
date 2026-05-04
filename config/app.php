@@ -324,7 +324,6 @@ return [
          */
         'test' => [
             'className' => Connection::class,
-            'driver' => Mysql::class,
             'persistent' => false,
             'timezone' => 'UTC',
             'encoding' => 'utf8mb4',
@@ -332,6 +331,7 @@ return [
             'cacheMetadata' => true,
             'quoteIdentifiers' => false,
             'log' => false,
+            'url' => env('DATABASE_TEST_URL', 'sqlite:///' . TMP . 'tests.sqlite'),
             //'init' => ['SET GLOBAL innodb_stats_on_metadata = 0'],
         ],
     ],

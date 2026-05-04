@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -13,7 +12,6 @@ use Cake\Validation\Validator;
  *
  * @property \App\Model\Table\EventsTable&\Cake\ORM\Association\BelongsTo $Events
  * @property \App\Model\Table\VolunteersTable&\Cake\ORM\Association\BelongsTo $Volunteers
- *
  * @method \App\Model\Entity\VolunteerEvent newEmptyEntity()
  * @method \App\Model\Entity\VolunteerEvent newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\VolunteerEvent> newEntities(array $data, array $options = [])

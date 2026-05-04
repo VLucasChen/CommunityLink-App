@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use Cake\Http\Response;
 use Cake\Mailer\Mailer;
+use Exception;
 
 /**
  * PublicController
@@ -15,25 +17,36 @@ use Cake\Mailer\Mailer;
  */
 class PublicController extends AppController
 {
+    /**
+     * @inheritDoc
+     */
     public function initialize(): void
     {
         parent::initialize();
         $this->viewBuilder()->setLayout('public');
     }
 
-    // 🏠 Trang chủ
-    public function home()
+    /**
+     * Home page with featured events.
+     *
+     * @return void
+     */
+    public function home(): void
     {
         $events = $this->Events->find('all', [
             'contain' => ['Organisations'],
             'order' => ['event_date' => 'ASC'],
-            'limit' => 3
+            'limit' => 3,
         ]);
         $this->set(compact('events'));
     }
 
-    // 🧍 Volunteer đăng ký
-    public function volunteerRegister()
+    /**
+     * Public volunteer registration form.
+     *
+     * @return \Cake\Http\Response|null
+     */
+    public function volunteerRegister(): ?Response
     {
         $signup = $this->VolunteerSignups->newEmptyEntity();
         if ($this->request->is('post')) {
@@ -54,30 +67,44 @@ class PublicController extends AppController
             $signup = $this->VolunteerSignups->patchEntity($signup, $data);
             if ($this->VolunteerSignups->save($signup)) {
                 $this->Flash->success('✅ Registration successful! Thank you for joining CommunityLink.');
+
                 return $this->redirect(['action' => 'volunteerRegister']);
             }
             $this->Flash->error('❌ Registration failed. Please check your input.');
         }
         $this->set(compact('signup'));
+
+        return null;
     }
 
-    // 🏢 Đăng ký tổ chức
-    public function organisationRegister()
+    /**
+     * Public partner organisation registration form.
+     *
+     * @return \Cake\Http\Response|null
+     */
+    public function organisationRegister(): ?Response
     {
         $organisation = $this->Organisations->newEmptyEntity();
         if ($this->request->is('post')) {
             $organisation = $this->Organisations->patchEntity($organisation, $this->request->getData());
             if ($this->Organisations->save($organisation)) {
                 $this->Flash->success('✅ Organisation registered successfully!');
+
                 return $this->redirect(['action' => 'organisationRegister']);
             }
             $this->Flash->error('❌ Failed to register organisation.');
         }
         $this->set(compact('organisation'));
+
+        return null;
     }
 
-    // 📬 Liên hệ
-    public function contact()
+    /**
+     * Public contact form.
+     *
+     * @return \Cake\Http\Response|null
+     */
+    public function contact(): ?Response
     {
         $contact = $this->ContactMessages->newEmptyEntity();
         if ($this->request->is('post')) {
@@ -90,21 +117,29 @@ class PublicController extends AppController
                         ->setTo('admin@communitylink.com')
                         ->setSubject('New Contact Message from ' . $contact->first_name)
                         ->deliver($contact->message);
-                } catch (\Exception $e) {}
+                } catch (Exception $e) {
+                }
                 $this->Flash->success('📩 Message sent successfully!');
+
                 return $this->redirect(['action' => 'contact']);
             }
             $this->Flash->error('❌ Unable to send your message.');
         }
         $this->set(compact('contact'));
+
+        return null;
     }
 
-    // 📅 Danh sách sự kiện công khai
-    public function publicEvents()
+    /**
+     * Public listing of events.
+     *
+     * @return void
+     */
+    public function publicEvents(): void
     {
         $events = $this->Events->find('all', [
             'contain' => ['Organisations'],
-            'order' => ['event_date' => 'ASC']
+            'order' => ['event_date' => 'ASC'],
         ]);
         $this->set(compact('events'));
     }

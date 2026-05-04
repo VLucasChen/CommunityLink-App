@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
-use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
@@ -24,7 +22,6 @@ use Cake\Validation\Validator;
  * @method iterable<\App\Model\Entity\VolunteerSignup>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\VolunteerSignup> saveManyOrFail(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\VolunteerSignup>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\VolunteerSignup>|false deleteMany(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\VolunteerSignup>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\VolunteerSignup> deleteManyOrFail(iterable $entities, array $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class VolunteerSignupsTable extends Table
@@ -84,9 +81,10 @@ class VolunteerSignupsTable extends Table
                     $pattern = '/^0[2-478][0-9]{8}$/';
                     // Remove spaces, dashes, and parentheses for validation
                     $cleaned = preg_replace('/[\s\-\(\)]/', '', $value);
+
                     return (bool)preg_match($pattern, $cleaned);
                 },
-                'message' => 'Please enter a valid Australian phone number in 04XX format (e.g., 0412 345 678).'
+                'message' => 'Please enter a valid Australian phone number in 04XX format (e.g., 0412 345 678).',
             ]);
 
         $validator

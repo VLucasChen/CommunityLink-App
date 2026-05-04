@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use Cake\I18n\Date;
 use Cake\Mailer\Mailer;
+use Exception;
 
 /**
  * VolunteerSignups Controller
@@ -21,10 +23,10 @@ class VolunteerSignupsController extends AppController
     {
         $this->requireLogin();
         $this->requireAdmin();
-        
+
         // Disable layout for admin pages (has full HTML with sidebar like A3)
         $this->viewBuilder()->setLayout(null);
-        
+
         $query = $this->VolunteerSignups->find();
 
         // Search by name only
@@ -33,8 +35,8 @@ class VolunteerSignupsController extends AppController
             $query->where([
                 'OR' => [
                     'VolunteerSignups.first_name LIKE' => '%' . $search . '%',
-                    'VolunteerSignups.last_name LIKE' => '%' . $search . '%'
-                ]
+                    'VolunteerSignups.last_name LIKE' => '%' . $search . '%',
+                ],
             ]);
         }
 
@@ -59,7 +61,7 @@ class VolunteerSignupsController extends AppController
 
         // A5 Requirement: Server-side pagination using QueryBuilder
         $volunteerSignups = $this->paginate($query->order(['VolunteerSignups.created' => 'DESC']), [
-            'limit' => 10
+            'limit' => 10,
         ]);
 
         $this->set(compact('volunteerSignups', 'search', 'status', 'skills', 'availability'));
@@ -72,14 +74,14 @@ class VolunteerSignupsController extends AppController
      * @return \Cake\Http\Response|null|void Renders view
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function view($id = null)
+    public function view(?string $id = null)
     {
         $this->requireLogin();
         $this->requireAdmin();
-        
+
         // Disable layout for admin pages (has full HTML with sidebar like A3)
         $this->viewBuilder()->setLayout(null);
-        
+
         $volunteerSignup = $this->VolunteerSignups->get($id, contain: []);
         $this->set(compact('volunteerSignup'));
     }
@@ -111,14 +113,14 @@ class VolunteerSignupsController extends AppController
      * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function edit($id = null)
+    public function edit(?string $id = null)
     {
         $this->requireLogin();
         $this->requireAdmin();
-        
+
         // Disable layout for admin pages (has full HTML with sidebar like A3)
         $this->viewBuilder()->setLayout(null);
-        
+
         $volunteerSignup = $this->VolunteerSignups->get($id, contain: []);
         if ($this->request->is(['patch', 'post', 'put'])) {
             // Only update status from the edit page
@@ -127,6 +129,7 @@ class VolunteerSignupsController extends AppController
                 $volunteerSignup->status = $newStatus;
                 if ($this->VolunteerSignups->save($volunteerSignup)) {
                     $this->Flash->success(__('Signup status updated.'));
+
                     return $this->redirect(['action' => 'index']);
                 }
             }
@@ -142,14 +145,14 @@ class VolunteerSignupsController extends AppController
      * @return \Cake\Http\Response|null Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function delete($id = null)
+    public function delete(?string $id = null)
     {
         $this->requireLogin();
         $this->requireAdmin();
-        
+
         $this->request->allowMethod(['post', 'delete']);
         $volunteerSignup = $this->VolunteerSignups->get($id);
-        
+
         // Delete associated files
         if ($volunteerSignup->profile_picture) {
             $profileFilename = str_replace('volunteer_profiles/', '', $volunteerSignup->profile_picture);
@@ -158,14 +161,14 @@ class VolunteerSignupsController extends AppController
                 unlink($profilePath);
             }
         }
-        
+
         if ($volunteerSignup->documents) {
             $docPath = WWW_ROOT . 'volunteer_documents' . DS . $volunteerSignup->documents;
             if (file_exists($docPath)) {
                 unlink($docPath);
             }
         }
-        
+
         if ($this->VolunteerSignups->delete($volunteerSignup)) {
             $this->Flash->success(__('The volunteer signup has been deleted.'));
         } else {
@@ -182,12 +185,12 @@ class VolunteerSignupsController extends AppController
      * @return \Cake\Http\Response|null Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function approve($id = null)
+    public function approve(?string $id = null)
     {
         $this->request->allowMethod(['post', 'patch', 'put']);
         $volunteerSignup = $this->VolunteerSignups->get($id);
         $volunteerSignup->status = 'hired';
-        
+
         if ($this->VolunteerSignups->save($volunteerSignup)) {
             $this->Flash->success(__('The volunteer signup has been approved.'));
         } else {
@@ -204,12 +207,12 @@ class VolunteerSignupsController extends AppController
      * @return \Cake\Http\Response|null Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function decline($id = null)
+    public function decline(?string $id = null)
     {
         $this->request->allowMethod(['post', 'patch', 'put']);
         $volunteerSignup = $this->VolunteerSignups->get($id);
         $volunteerSignup->status = 'declined';
-        
+
         if ($this->VolunteerSignups->save($volunteerSignup)) {
             $this->Flash->success(__('The volunteer signup has been declined.'));
         } else {
@@ -228,24 +231,25 @@ class VolunteerSignupsController extends AppController
     public function updateStatus()
     {
         $this->request->allowMethod(['post', 'patch', 'put']);
-        
+
         $signupId = $this->request->getData('signup_id');
         $newStatus = $this->request->getData('status');
-        
+
         if (!$signupId || !in_array($newStatus, ['pending', 'hired', 'declined'])) {
             $this->Flash->error(__('Invalid request.'));
+
             return $this->redirect(['action' => 'index']);
         }
-        
+
         try {
             $volunteerSignup = $this->VolunteerSignups->get($signupId);
             $volunteerSignup->status = $newStatus;
-            
+
             // If status is being changed to 'hired', create a volunteer record (A3 logic)
             if ($newStatus === 'hired') {
                 $volunteersTable = $this->fetchTable('Volunteers');
                 $volunteer = $volunteersTable->newEmptyEntity();
-                
+
                 // Map volunteer signup to volunteer (A5 schema)
                 $volunteer->first_name = $volunteerSignup->first_name;
                 $volunteer->last_name = $volunteerSignup->last_name;
@@ -256,14 +260,14 @@ class VolunteerSignupsController extends AppController
                 $volunteer->documents = $volunteerSignup->documents;
                 $volunteer->availability = $volunteerSignup->availability;
                 $volunteer->self_intro = $volunteerSignup->self_intro;
-                $volunteer->date_submitted = $volunteerSignup->date_submitted ?? new \Cake\I18n\Date();
+                $volunteer->date_submitted = $volunteerSignup->date_submitted ?? new Date();
                 $volunteer->status = 'active';
-                
+
                 if ($volunteersTable->save($volunteer)) {
                     $this->Flash->success(__('Volunteer hired successfully! A new volunteer record has been created.'));
                 }
             }
-            
+
             if ($this->VolunteerSignups->save($volunteerSignup)) {
                 if ($newStatus !== 'hired') {
                     $this->Flash->success(__('Volunteer signup status updated successfully!'));
@@ -271,7 +275,7 @@ class VolunteerSignupsController extends AppController
             } else {
                 $this->Flash->error(__('The volunteer signup could not be updated. Please, try again.'));
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->Flash->error(__('Database error: ' . $e->getMessage()));
         }
 
@@ -288,34 +292,34 @@ class VolunteerSignupsController extends AppController
     {
         // Disable layout for public page (has full HTML like A3)
         $this->viewBuilder()->setLayout(null);
-        
+
         $message = '';
         $error = '';
         $volunteerSignup = $this->VolunteerSignups->newEmptyEntity();
-        
+
         if ($this->request->is('post')) {
             $data = $this->request->getData();
-            
+
             // Handle profile picture upload (A5 requirement)
             $profilePicture = '';
             if (!empty($this->request->getUploadedFiles()['profile_picture'])) {
                 $file = $this->request->getUploadedFiles()['profile_picture'];
-                
+
                 if ($file->getError() === UPLOAD_ERR_OK) {
                     $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
                     $fileType = $file->getClientMediaType();
-                    
+
                     if (in_array($fileType, $allowedTypes)) {
                         $fileExtension = strtolower(pathinfo($file->getClientFilename(), PATHINFO_EXTENSION));
                         $profilePicture = 'signup_' . time() . '_' . uniqid() . '.' . $fileExtension;
                         // Store in webroot/img/volunteer_profiles to align with Volunteers page
                         $uploadDir = WWW_ROOT . 'img' . DS . 'volunteer_profiles' . DS;
-                        
+
                         // Create directory if it doesn't exist
                         if (!is_dir($uploadDir)) {
                             mkdir($uploadDir, 0755, true);
                         }
-                        
+
                         $file->moveTo($uploadDir . $profilePicture);
                         $data['profile_picture'] = $profilePicture;
                     } else {
@@ -327,12 +331,12 @@ class VolunteerSignupsController extends AppController
             } else {
                 $error = 'Please upload a profile picture.';
             }
-            
+
             // Handle documents upload (A5 requirement: WWCC, Police check, CV etc combined into one PDF)
             $documents = '';
             if (empty($error) && !empty($this->request->getUploadedFiles()['documents'])) {
                 $file = $this->request->getUploadedFiles()['documents'];
-                
+
                 if ($file->getError() === UPLOAD_ERR_OK) {
                     // Check file size (10MB max)
                     if ($file->getSize() > 10 * 1024 * 1024) {
@@ -340,18 +344,18 @@ class VolunteerSignupsController extends AppController
                     } else {
                         $fileType = $file->getClientMediaType();
                         $fileExtension = strtolower(pathinfo($file->getClientFilename(), PATHINFO_EXTENSION));
-                        
+
                         // Allow PDF files only
                         if ($fileType === 'application/pdf' || $fileExtension === 'pdf') {
                             $documents = 'signup_docs_' . time() . '_' . uniqid() . '.pdf';
                             // Keep documents in webroot/volunteer_documents (as used elsewhere)
                             $uploadDir = WWW_ROOT . 'volunteer_documents' . DS;
-                            
+
                             // Create directory if it doesn't exist
                             if (!is_dir($uploadDir)) {
                                 mkdir($uploadDir, 0755, true);
                             }
-                            
+
                             $file->moveTo($uploadDir . $documents);
                             $data['documents'] = $documents;
                         } else {
@@ -361,34 +365,34 @@ class VolunteerSignupsController extends AppController
                 } else {
                     $error = 'Please upload your official documents (PDF).';
                 }
-            } else if (empty($error)) {
+            } elseif (empty($error)) {
                 $error = 'Please upload your official documents (PDF).';
             }
-            
+
             // Set default status to pending (A3 behavior)
             $data['status'] = 'pending';
-            
+
             // A5 Requirement: Set date_submitted to today's date
             $data['date_submitted'] = date('Y-m-d');
-            
+
             // Patch entity with form data
             $volunteerSignup = $this->VolunteerSignups->patchEntity($volunteerSignup, $data);
-            
+
             if (empty($error) && $this->VolunteerSignups->save($volunteerSignup)) {
                 // Send email notification using CakePHP Mailer
                 try {
                     $emailBody = "A new volunteer has signed up:\n\n";
-                    $emailBody .= "Name: " . $volunteerSignup->first_name . ' ' . $volunteerSignup->last_name . "\n";
-                    $emailBody .= "Email: " . $volunteerSignup->email . "\n";
-                    $emailBody .= "Phone: " . $volunteerSignup->phone . "\n";
-                    $emailBody .= "Skills: " . $volunteerSignup->skills . "\n";
-                    $emailBody .= "Availability: " . ($volunteerSignup->availability ?? 'N/A') . "\n";
+                    $emailBody .= 'Name: ' . $volunteerSignup->first_name . ' ' . $volunteerSignup->last_name . "\n";
+                    $emailBody .= 'Email: ' . $volunteerSignup->email . "\n";
+                    $emailBody .= 'Phone: ' . $volunteerSignup->phone . "\n";
+                    $emailBody .= 'Skills: ' . $volunteerSignup->skills . "\n";
+                    $emailBody .= 'Availability: ' . ($volunteerSignup->availability ?? 'N/A') . "\n";
                     $emailBody .= "Self-intro:\n" . ($volunteerSignup->self_intro ?? 'N/A') . "\n";
-                    $emailBody .= "Documents: " . ($volunteerSignup->documents ?? 'N/A') . "\n";
-                    $emailBody .= "Date Submitted: " . ($volunteerSignup->date_submitted ? $volunteerSignup->date_submitted->format('Y-m-d') : date('Y-m-d')) . "\n\n";
-                    $emailBody .= "Submitted on: " . date('Y-m-d H:i:s') . "\n";
-                    $emailBody .= "This signup was submitted from the CommunityLink volunteer signup form.";
-                    
+                    $emailBody .= 'Documents: ' . ($volunteerSignup->documents ?? 'N/A') . "\n";
+                    $emailBody .= 'Date Submitted: ' . ($volunteerSignup->date_submitted ? $volunteerSignup->date_submitted->format('Y-m-d') : date('Y-m-d')) . "\n\n";
+                    $emailBody .= 'Submitted on: ' . date('Y-m-d H:i:s') . "\n";
+                    $emailBody .= 'This signup was submitted from the CommunityLink volunteer signup form.';
+
                     // A5 Requirement: Email must go to admin@communitylink.com
                     $mailer = new Mailer('default');
                     $mailer->setFrom(['noreply@communitylink.com' => 'CommunityLink'])
@@ -397,10 +401,10 @@ class VolunteerSignupsController extends AppController
                         ->setSubject('New Volunteer Signup - CommunityLink')
                         ->setEmailFormat('text')
                         ->deliver($emailBody);
-                    
+
                     $message = 'Thank you for your volunteer application! We will review your information and get back to you soon.';
                     $volunteerSignup = $this->VolunteerSignups->newEmptyEntity(); // Clear form
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $error = 'Your application was saved but there was an issue sending the email notification. We will still receive your application.';
                 }
             } else {
@@ -409,7 +413,7 @@ class VolunteerSignupsController extends AppController
                     $validationErrors = $volunteerSignup->getErrors();
                     if (!empty($validationErrors)) {
                         $errorMessages = [];
-                        foreach ($validationErrors as $field => $errors) {
+                        foreach ($validationErrors as $errors) {
                             foreach ($errors as $errorMsg) {
                                 $errorMessages[] = $errorMsg;
                             }
@@ -421,7 +425,7 @@ class VolunteerSignupsController extends AppController
                 }
             }
         }
-        
+
         $this->set(compact('volunteerSignup', 'message', 'error'));
     }
 }

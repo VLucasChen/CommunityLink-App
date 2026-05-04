@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -12,7 +11,6 @@ use Cake\Validation\Validator;
  * Users Model
  *
  * @property \App\Model\Table\VolunteersTable&\Cake\ORM\Association\BelongsTo $Volunteers
- *
  * @method \App\Model\Entity\User newEmptyEntity()
  * @method \App\Model\Entity\User newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\User> newEntities(array $data, array $options = [])
@@ -66,7 +64,7 @@ class UsersTable extends Table
             ->add('username', 'unique', ['rule' => 'validateUnique', 'provider' => 'table'])
             ->add('username', 'validFormat', [
                 'rule' => ['custom', '/^[a-zA-Z0-9_]+$/'],
-                'message' => 'Username can only contain letters, numbers, and underscores.'
+                'message' => 'Username can only contain letters, numbers, and underscores.',
             ]);
 
         $validator

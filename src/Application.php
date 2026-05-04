@@ -16,6 +16,10 @@ declare(strict_types=1);
  */
 namespace App;
 
+use Authentication\AuthenticationService;
+use Authentication\AuthenticationServiceInterface;
+use Authentication\AuthenticationServiceProviderInterface;
+use Authentication\Middleware\AuthenticationMiddleware;
 use Cake\Core\Configure;
 use Cake\Core\ContainerInterface;
 use Cake\Datasource\FactoryLocator;
@@ -27,10 +31,6 @@ use Cake\Http\MiddlewareQueue;
 use Cake\ORM\Locator\TableLocator;
 use Cake\Routing\Middleware\AssetMiddleware;
 use Cake\Routing\Middleware\RoutingMiddleware;
-use Authentication\AuthenticationService;
-use Authentication\AuthenticationServiceInterface;
-use Authentication\AuthenticationServiceProviderInterface;
-use Authentication\Middleware\AuthenticationMiddleware;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -120,7 +120,7 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
     public function getAuthenticationService(ServerRequestInterface $request): AuthenticationServiceInterface
     {
         $path = $request->getUri()->getPath();
-        
+
         // Define paths that don't require authentication
         $publicPaths = [
             '/users/login',
@@ -131,7 +131,7 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             '/organisations/public-signup',
             '/contact-messages/public-contact',
         ];
-        
+
         // Check if current path is public
         $isPublic = false;
         foreach ($publicPaths as $publicPath) {
@@ -140,7 +140,7 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
                 break;
             }
         }
-        
+
         // Configure authentication service
         // For public pages, don't require authentication and don't redirect
         if ($isPublic) {
@@ -155,7 +155,7 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
                 'unauthenticatedRedirect' => '/users/login',
             ];
         }
-        
+
         $authenticationService = new AuthenticationService($config);
 
         // Load identifiers, ensuring we check username and password
@@ -163,7 +163,7 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             'fields' => [
                 'username' => 'username',
                 'password' => 'password',
-            ]
+            ],
         ]);
 
         // Load the authenticators, you want session first

@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
-use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
@@ -95,9 +93,10 @@ class VolunteersTable extends Table
                     $pattern = '/^0[2-478][0-9]{8}$/';
                     // Remove spaces, dashes, and parentheses for validation
                     $cleaned = preg_replace('/[\s\-\(\)]/', '', $value);
+
                     return (bool)preg_match($pattern, $cleaned);
                 },
-                'message' => 'Please enter a valid Australian phone number in 04XX format (e.g., 0412 345 678).'
+                'message' => 'Please enter a valid Australian phone number in 04XX format (e.g., 0412 345 678).',
             ]);
 
         $validator

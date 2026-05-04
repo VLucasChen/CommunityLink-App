@@ -3,16 +3,16 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
+use Cake\I18n\Date;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
+use DateTime;
 
 /**
  * Events Model
  *
  * @property \App\Model\Table\OrganisationsTable&\Cake\ORM\Association\BelongsTo $Organisations
- *
  * @method \App\Model\Entity\Event newEmptyEntity()
  * @method \App\Model\Entity\Event newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\Event> newEntities(array $data, array $options = [])
@@ -87,17 +87,19 @@ class EventsTable extends Table
             ->add('event_date', 'futureDate', [
                 'rule' => function ($value, $context) {
                     // Allow past dates (for archive/failed events), but validate format
-                    if ($value instanceof \Cake\I18n\Date || $value instanceof \DateTime) {
+                    if ($value instanceof Date || $value instanceof DateTime) {
                         return true;
                     }
                     // If it's a string, try to parse it
                     if (is_string($value)) {
-                        $date = \Cake\I18n\Date::parseDate($value);
+                        $date = Date::parseDate($value);
+
                         return $date !== false;
                     }
+
                     return false;
                 },
-                'message' => 'Please enter a valid date.'
+                'message' => 'Please enter a valid date.',
             ]);
 
         $validator
@@ -108,7 +110,7 @@ class EventsTable extends Table
                 'rule' => function ($value, $context) {
                     return is_numeric($value) && $value > 0;
                 },
-                'message' => 'Event size must be a positive number.'
+                'message' => 'Event size must be a positive number.',
             ]);
 
         $validator
@@ -143,7 +145,7 @@ class EventsTable extends Table
                 'rule' => function ($value, $context) {
                     return is_numeric($value) && $value > 0;
                 },
-                'message' => 'Number of required crews must be a positive number.'
+                'message' => 'Number of required crews must be a positive number.',
             ]);
 
         $validator

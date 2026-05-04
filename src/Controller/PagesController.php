@@ -13,6 +13,8 @@ use Cake\Http\Exception\ForbiddenException;
 use Cake\Http\Exception\NotFoundException;
 use Cake\Http\Response;
 use Cake\View\Exception\MissingTemplateException;
+use DateTime;
+use stdClass;
 
 /**
  * Static content controller
@@ -64,11 +66,11 @@ class PagesController extends AppController
             $this->viewBuilder()->setLayout(null);
             $path = ['home']; // Ensure path is set for rendering
         }
-        
+
         if (in_array('..', $path, true) || in_array('.', $path, true)) {
             throw new ForbiddenException();
         }
-        
+
         $page = $subpage = null;
         if (!empty($path[0])) {
             $page = $path[0];
@@ -103,17 +105,16 @@ class PagesController extends AppController
     {
         $this->requireLogin();
         $this->requireAdmin();
-        
+
         // Disable layout for dashboard (has full HTML with sidebar like A3)
         $this->viewBuilder()->setLayout(null);
-        
+
         // In CakePHP 5, prefer fetchTable() to access tables directly
         $eventsTable = $this->fetchTable('Events');
         $volunteersTable = $this->fetchTable('Volunteers');
         $organisationsTable = $this->fetchTable('Organisations');
         $contactMessagesTable = $this->fetchTable('ContactMessages');
         $volunteerSignupsTable = $this->fetchTable('VolunteerSignups');
-        $volunteerEventsTable = $this->fetchTable('VolunteerEvents');
 
         // A5 Requirement: Top 10 most active volunteers (events participated in current year)
         // Get all volunteers with their event counts for current year
@@ -134,12 +135,12 @@ class PagesController extends AppController
             if ($eventCount > 0) {
                 $volunteerActivity[] = [
                     'volunteer' => $volunteer,
-                    'event_count' => $eventCount
+                    'event_count' => $eventCount,
                 ];
             }
         }
         // Sort by event count descending and take top 10
-        usort($volunteerActivity, function($a, $b) {
+        usort($volunteerActivity, function ($a, $b) {
             return $b['event_count'] - $a['event_count'];
         });
         $topVolunteers = array_slice($volunteerActivity, 0, 10);
@@ -163,12 +164,12 @@ class PagesController extends AppController
             if ($eventCount > 0) {
                 $orgActivity[] = [
                     'organisation' => $org,
-                    'event_count' => $eventCount
+                    'event_count' => $eventCount,
                 ];
             }
         }
         // Sort by event count descending and take top 10
-        usort($orgActivity, function($a, $b) {
+        usort($orgActivity, function ($a, $b) {
             return $b['event_count'] - $a['event_count'];
         });
         $topOrganisations = array_slice($orgActivity, 0, 10);
@@ -199,11 +200,11 @@ class PagesController extends AppController
                 'Events.event_date <' => $today,
                 'OR' => [
                     ['Events.status' => 'Ready to go'],
-                    ['Events.status' => 'Preparing']
-                ]
+                    ['Events.status' => 'Preparing'],
+                ],
             ])
             ->toArray();
-        
+
         foreach ($pastEvents as $event) {
             if ($event->status === 'Ready to go') {
                 $event->status = 'Archive';
@@ -212,37 +213,37 @@ class PagesController extends AppController
             }
             $eventsTable->save($event);
         }
-        
+
         // A5 Requirement: Events in coming month by status (dynamic next month)
-        $startOfNextMonth = (new \DateTime('first day of next month'));
-        $endOfNextMonth = (new \DateTime('last day of next month'));
+        $startOfNextMonth = new DateTime('first day of next month');
+        $endOfNextMonth = new DateTime('last day of next month');
         $allEventsNextMonth = $eventsTable->find()
             ->select(['Events.id', 'Events.status'])
             ->where([
                 'Events.event_date >=' => $startOfNextMonth->format('Y-m-d'),
-                'Events.event_date <=' => $endOfNextMonth->format('Y-m-d')
+                'Events.event_date <=' => $endOfNextMonth->format('Y-m-d'),
             ])
             ->toArray();
-        
+
         // Count events by status
         $eventsNextMonthCounts = [
             'Preparing' => 0,
             'Ready to go' => 0,
             'Archive' => 0,
-            'Failed' => 0
+            'Failed' => 0,
         ];
-        
+
         foreach ($allEventsNextMonth as $event) {
             $status = $event->status ?? 'Preparing';
             if (isset($eventsNextMonthCounts[$status])) {
                 $eventsNextMonthCounts[$status]++;
             }
         }
-        
+
         // Convert to array of objects for template compatibility
         $eventsNextMonth = [];
         foreach ($eventsNextMonthCounts as $status => $count) {
-            $stat = new \stdClass();
+            $stat = new stdClass();
             $stat->status = $status;
             $stat->count = $count;
             $eventsNextMonth[] = $stat;
@@ -278,7 +279,7 @@ class PagesController extends AppController
             'signupCount',
             'totalSignupCount',
             'hiredSignupCount',
-            'declinedSignupCount'
+            'declinedSignupCount',
         ));
     }
 }

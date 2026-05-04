@@ -17,7 +17,6 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use Cake\Controller\Controller;
-use Authentication\Controller\Component\AuthenticationComponent;
 
 /**
  * Application Controller
@@ -65,6 +64,7 @@ class AppController extends Controller
     protected function isLoggedIn(): bool
     {
         $result = $this->Authentication->getResult();
+
         return $result->isValid();
     }
 
@@ -117,7 +117,7 @@ class AppController extends Controller
     protected function isVolunteer(): bool
     {
         $user = $this->Authentication->getIdentity();
+
         return $user && ($user->get('role') === 'volunteer');
     }
 }
-

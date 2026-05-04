@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use Cake\Mailer\Mailer;
+use Exception;
 
 /**
  * ContactMessages Controller
@@ -21,10 +22,10 @@ class ContactMessagesController extends AppController
     {
         $this->requireLogin();
         $this->requireAdmin();
-        
+
         // Disable layout for admin pages (has full HTML with sidebar like A3)
         $this->viewBuilder()->setLayout(null);
-        
+
         $query = $this->ContactMessages->find();
 
         // Filters: sender name and message content
@@ -33,8 +34,8 @@ class ContactMessagesController extends AppController
             $query->where([
                 'OR' => [
                     'ContactMessages.first_name LIKE' => '%' . $sender . '%',
-                    'ContactMessages.last_name LIKE' => '%' . $sender . '%'
-                ]
+                    'ContactMessages.last_name LIKE' => '%' . $sender . '%',
+                ],
             ]);
         }
         $messageFilter = $this->request->getQuery('message');
@@ -52,7 +53,7 @@ class ContactMessagesController extends AppController
 
         // A5 Requirement: Server-side pagination using QueryBuilder
         $contactMessages = $this->paginate($query->order(['ContactMessages.created' => 'DESC']), [
-            'limit' => 10
+            'limit' => 10,
         ]);
 
         $this->set(compact('contactMessages', 'sender', 'messageFilter', 'status_filter'));
@@ -65,14 +66,14 @@ class ContactMessagesController extends AppController
      * @return \Cake\Http\Response|null|void Renders view
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function view($id = null)
+    public function view(?string $id = null)
     {
         $this->requireLogin();
         $this->requireAdmin();
-        
+
         // Disable layout for admin pages (has full HTML with sidebar like A3)
         $this->viewBuilder()->setLayout(null);
-        
+
         $contactMessage = $this->ContactMessages->get($id, contain: []);
         $this->set(compact('contactMessage'));
     }
@@ -104,7 +105,7 @@ class ContactMessagesController extends AppController
      * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function edit($id = null)
+    public function edit(?string $id = null)
     {
         $this->requireLogin();
         $this->requireAdmin();
@@ -121,11 +122,12 @@ class ContactMessagesController extends AppController
                         ->setTo($contactMessage->email)
                         ->setSubject('Re: Your message to CommunityLink')
                         ->setEmailFormat('text')
-                        ->deliver("Dear " . ($contactMessage->first_name ?: 'Community member') . ",\n\n" . $replyBody . "\n\nBest regards,\nCommunityLink");
+                        ->deliver('Dear ' . ($contactMessage->first_name ?: 'Community member') . ",\n\n" . $replyBody . "\n\nBest regards,\nCommunityLink");
                     $this->Flash->success(__('Reply sent successfully.'));
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $this->Flash->error(__('Failed to send the reply. Please try again.'));
                 }
+
                 return $this->redirect(['action' => 'index']);
             } else {
                 // Only allow changing reply status
@@ -133,6 +135,7 @@ class ContactMessagesController extends AppController
                 $contactMessage->is_replied = $isReplied;
                 if ($this->ContactMessages->save($contactMessage)) {
                     $this->Flash->success(__('Status updated.'));
+
                     return $this->redirect(['action' => 'index']);
                 }
                 $this->Flash->error(__('The status could not be updated. Please, try again.'));
@@ -148,7 +151,7 @@ class ContactMessagesController extends AppController
      * @return \Cake\Http\Response|null Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function delete($id = null)
+    public function delete(?string $id = null)
     {
         $this->requireLogin();
         $this->requireAdmin();
@@ -171,12 +174,12 @@ class ContactMessagesController extends AppController
      * @return \Cake\Http\Response|null Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function markReplied($id = null)
+    public function markReplied(?string $id = null)
     {
         $this->request->allowMethod(['post', 'patch', 'put']);
         $contactMessage = $this->ContactMessages->get($id);
         $contactMessage->is_replied = true;
-        
+
         if ($this->ContactMessages->save($contactMessage)) {
             $this->Flash->success(__('The contact message has been marked as replied.'));
         } else {
@@ -196,28 +199,28 @@ class ContactMessagesController extends AppController
     {
         // Disable layout for public page (has full HTML like A3)
         $this->viewBuilder()->setLayout(null);
-        
+
         $message = '';
         $error = '';
         $contactMessage = $this->ContactMessages->newEmptyEntity();
-        
+
         if ($this->request->is('post')) {
             $data = $this->request->getData();
-            
+
             // Patch entity with form data
             $contactMessage = $this->ContactMessages->patchEntity($contactMessage, $data);
-            
+
             if ($this->ContactMessages->save($contactMessage)) {
                 // Send email notification using CakePHP Mailer
                 try {
                     $emailBody = "A new contact form has been submitted:\n\n";
-                    $emailBody .= "Name: " . $contactMessage->first_name . ' ' . $contactMessage->last_name . "\n";
-                    $emailBody .= "Email: " . $contactMessage->email . "\n";
-                    $emailBody .= "Phone: " . $contactMessage->phone . "\n";
+                    $emailBody .= 'Name: ' . $contactMessage->first_name . ' ' . $contactMessage->last_name . "\n";
+                    $emailBody .= 'Email: ' . $contactMessage->email . "\n";
+                    $emailBody .= 'Phone: ' . $contactMessage->phone . "\n";
                     $emailBody .= "Message:\n" . $contactMessage->message . "\n\n";
-                    $emailBody .= "Submitted on: " . date('Y-m-d H:i:s') . "\n";
-                    $emailBody .= "This message was sent from the CommunityLink website contact form.";
-                    
+                    $emailBody .= 'Submitted on: ' . date('Y-m-d H:i:s') . "\n";
+                    $emailBody .= 'This message was sent from the CommunityLink website contact form.';
+
                     // A5 Requirement: Email must go to admin@communitylink.com
                     $mailer = new Mailer('default');
                     $mailer->setFrom(['noreply@communitylink.com' => 'CommunityLink'])
@@ -226,10 +229,10 @@ class ContactMessagesController extends AppController
                         ->setSubject('New Contact Form Submission - CommunityLink')
                         ->setEmailFormat('text')
                         ->deliver($emailBody);
-                    
+
                     $message = 'Thank you for your message! We will get back to you soon.';
                     $contactMessage = $this->ContactMessages->newEmptyEntity(); // Clear form
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $error = 'Your message was saved but there was an issue sending the email notification. We will still receive your message.';
                 }
             } else {
@@ -237,7 +240,7 @@ class ContactMessagesController extends AppController
                 $validationErrors = $contactMessage->getErrors();
                 if (!empty($validationErrors)) {
                     $errorMessages = [];
-                    foreach ($validationErrors as $field => $errors) {
+                    foreach ($validationErrors as $errors) {
                         foreach ($errors as $errorMsg) {
                             $errorMessages[] = $errorMsg;
                         }
@@ -248,7 +251,7 @@ class ContactMessagesController extends AppController
                 }
             }
         }
-        
+
         $this->set(compact('contactMessage', 'message', 'error'));
     }
 }

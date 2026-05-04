@@ -31,6 +31,10 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 
 require dirname(__DIR__) . '/config/bootstrap.php';
 
+// Avoid E_USER_DEPRECATED from plugins breaking integration tests (PHP 8.4+ / Auth plugin).
+Configure::write('Error.errorLevel', E_ALL & ~E_USER_DEPRECATED);
+Configure::write('TestSuite.errorLevel', E_ALL & ~E_USER_DEPRECATED);
+
 if (empty($_SERVER['HTTP_HOST']) && !Configure::read('App.fullBaseUrl')) {
     Configure::write('App.fullBaseUrl', 'http://localhost');
 }
@@ -61,15 +65,10 @@ session_id('cli');
 // Otherwise, table objects inside migrations would use the default datasource
 ConnectionHelper::addTestAliases();
 
-// Use migrations to build test database schema.
-//
-// Will rebuild the database if the migration state differs
-// from the migration history in files.
-//
-// If you are not using CakePHP's migrations you can
-// hook into your migration tool of choice here or
-// load schema from a SQL dump file with
-// use Cake\TestSuite\Fixture\SchemaLoader;
-// (new SchemaLoader())->loadSqlFiles('./tests/schema.sql', 'test');
-
-(new Migrator())->run();
+// Build test DB schema from Phinx migrations when present; otherwise tests rely
+// on an empty SQLite DB and tests that declare no fixtures (see phpunit.xml).
+$migrationPath = ROOT . DS . 'config' . DS . 'Migrations';
+$migrationFiles = is_dir($migrationPath) ? (glob($migrationPath . '/*.php') ?: []) : [];
+if ($migrationFiles !== []) {
+    (new Migrator())->run();
+}

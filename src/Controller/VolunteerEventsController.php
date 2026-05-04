@@ -31,7 +31,7 @@ class VolunteerEventsController extends AppController
      * @return \Cake\Http\Response|null|void Renders view
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function view($id = null)
+    public function view(?string $id = null)
     {
         $volunteerEvent = $this->VolunteerEvents->get($id, contain: ['Events', 'Volunteers']);
         $this->set(compact('volunteerEvent'));
@@ -59,14 +59,14 @@ class VolunteerEventsController extends AppController
             'keyField' => 'id',
             'valueField' => function ($event) {
                 return $event->title . ' - ' . $event->location . ' (' . ($event->event_date ? $event->event_date->format('Y-m-d') : 'N/A') . ')';
-            }
+            },
         ])->order(['event_date' => 'DESC'])->all();
-        
+
         $volunteers = $this->VolunteerEvents->Volunteers->find('list', [
             'keyField' => 'id',
             'valueField' => function ($volunteer) {
                 return $volunteer->first_name . ' ' . $volunteer->last_name . ' (' . $volunteer->email . ')';
-            }
+            },
         ])->order(['first_name' => 'ASC', 'last_name' => 'ASC'])->all();
         $this->set(compact('volunteerEvent', 'events', 'volunteers'));
     }
@@ -78,7 +78,7 @@ class VolunteerEventsController extends AppController
      * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function edit($id = null)
+    public function edit(?string $id = null)
     {
         $volunteerEvent = $this->VolunteerEvents->get($id, contain: []);
         if ($this->request->is(['patch', 'post', 'put'])) {
@@ -95,14 +95,14 @@ class VolunteerEventsController extends AppController
             'keyField' => 'id',
             'valueField' => function ($event) {
                 return $event->title . ' - ' . $event->location . ' (' . ($event->event_date ? $event->event_date->format('Y-m-d') : 'N/A') . ')';
-            }
+            },
         ])->order(['event_date' => 'DESC'])->all();
-        
+
         $volunteers = $this->VolunteerEvents->Volunteers->find('list', [
             'keyField' => 'id',
             'valueField' => function ($volunteer) {
                 return $volunteer->first_name . ' ' . $volunteer->last_name . ' (' . $volunteer->email . ')';
-            }
+            },
         ])->order(['first_name' => 'ASC', 'last_name' => 'ASC'])->all();
         $this->set(compact('volunteerEvent', 'events', 'volunteers'));
     }
@@ -114,7 +114,7 @@ class VolunteerEventsController extends AppController
      * @return \Cake\Http\Response|null Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function delete($id = null)
+    public function delete(?string $id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
         $volunteerEvent = $this->VolunteerEvents->get($id);
