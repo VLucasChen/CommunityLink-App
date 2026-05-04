@@ -1,263 +1,104 @@
-# CommunityLink - Community Event Management System
+# CommunityLink
 
-Event and volunteer management for not-for-profits — full-stack PHP (CakePHP), MySQL, and Bootstrap.
+Web application for **event planning**, **volunteer coordination**, and **partner organisation** workflows for community and not-for-profit teams. Public pages support discovery and sign-up; authenticated staff get dashboards, CRUD, search, and file handling behind role-based access.
 
-**Assignment 5 - FIT2104 Web Database Applications**
+**Stack:** PHP 8.2+, CakePHP 5, MySQL, Bootstrap 5, Font Awesome 6.
 
-## Authors
+---
 
-- **HUANG YICHEN** — Submitted 09/11/2025
-- **LE HOANG** — Submitted 09/11/2025
+## Features
 
-## Repository
+- **Public site:** branded home, volunteer registration (with document upload), partner organisation registration, contact enquiries.
+- **Admin dashboard:** activity summaries (top volunteers and partners, skills distribution, upcoming events), sensible defaults such as archiving past events.
+- **Operations:** full CRUD for events, volunteers, volunteer sign-ups, organisations, users, and contact messages; related-record views; server-side search and filters; pagination.
+- **Security:** CakePHP Authentication, hashed passwords, roles (admin, assistant, volunteer), guardrails (e.g. assistants cannot delete admin users), parameterized queries via the ORM.
+- **Uploads:** volunteer profile images and documents with storage under `webroot/`.
+- **Validation:** Australian mobile-style phone rules where applicable, email and required-field checks, numeric and date rules, consistent field-level errors.
 
-**GitHub (public mirror):** https://github.com/VLucasChen/CommunityLink-App  
+---
 
-**Monash GitLab (course submission):** https://git.infotech.monash.edu/fit2104/fit2104-2025-s2/assessment-5
+## Requirements
 
-## Database Dump File
+- PHP 8.2+
+- MySQL 5.7+ (or compatible)
+- [Composer](https://getcomposer.org/)
 
-**Filename:** `schema_data.sql`  
-**Location:** `LAB01_GROUP24/schema_data.sql`
+---
 
-This file contains:
-- Complete table creation statements with primary keys, foreign keys, and column constraints
-- All INSERT statements for initial data
-- Can be used to restore the database to the exact state at submission time
+## Quick start
 
-To import the database:
+### 1. Clone and install
+
 ```bash
-mysql -u [username] -p A5 < schema_data.sql
+git clone https://github.com/VLucasChen/CommunityLink-App.git
+cd CommunityLink-App
+composer install
 ```
 
-Or using MySQL client:
+### 2. Local configuration
+
+CakePHP reads `config/app_local.php` for environment-specific settings (this file is gitignored).
+
+```bash
+cp config/app_local.example.php config/app_local.php
+```
+
+Edit `config/app_local.php` and set your MySQL `Datasources.default` host, username, password, and database name. The bundled seed script creates a database named **`A5`** by default; you can change that in `schema_data.sql` and match it in `app_local.php` if you prefer another name.
+
+### 3. Database
+
+```bash
+mysql -u YOUR_USER -p < schema_data.sql
+```
+
+Or from the MySQL client after creating/selecting your database:
+
 ```sql
 SOURCE schema_data.sql;
 ```
 
-## Login credentials
+The seed file includes schema, constraints, a demo admin user (hashed password), and sample organisations, volunteers, and events. **Replace demo credentials** before any shared or production deployment.
 
-### Admin account
-After importing `schema_data.sql`, a demo administrator account is created (see the seed data for the username; the password is stored as a hash). **Change or replace demo credentials** before any shared or production deployment.
+### 4. Writable paths
 
-### Volunteer account
-Volunteer accounts are not pre-created in the database. To create a volunteer account:
-
-1. Log in with an administrator account
-2. Navigate to **Users** → **Add User**
-3. Create a user with role "volunteer"
-4. Link the user to an existing volunteer record (or create a volunteer first via **Volunteers** → **Add Volunteer**)
-
-**Note:** The database includes sample volunteer data (15 volunteers), but no user accounts are linked to them initially. Volunteer user accounts must be created through the admin interface.
-
-## Work Breakdown Agreement
-
-**HUANG YICHEN:**
-
-Task 1: Database Schema Design and CakePHP Compliance
-Task 2: Authentication System Implementation
-Task 3: Public-Facing Pages( Home Page, Contact Us Page, Volunteer Signup Page, Organisation Registration Page)
-Task 4: Admin Dashboard
-Task 5: Events Management
-Task 6: Volunteers Management
-Task 7: Volunteer Signups Management
-Task 8: Organisations Management
-Task 9: Users Management
-Task 10: Contact Messages Management
-Task 11: Search and Filter Functionality
-Task 12: Pagination Implementation
-Task 13: File Upload Handling
-Task 14: Email Notifications
-Task 15: Validation and Error Handling
-Task 16: UI/UX Improvements and Virtual Fields
-Task 17: CakePHP Configuration
-Task 18: Branding Customization
-Task 19: Code Quality and Best Practices
-
-HUANG YICHEN agrees with the work breakdown agreement. 07/11/2025
-
----
-
-**LE HOANG:** 
-
-Task 1: Users Management
-Task 2: Contact Messages Management
-Task 3: Search and Filter Functionality
-Task 4: Pagination Implementation
-Task 5: File Upload Handling
-Task 6: Email Notifications
-Task 7: Validation and Error Handling
-Task 8: UI/UX Improvements and Virtual Fields
-Task 9: Pagination Implementation
-Task 10: File Upload Handling
-Task 11: Email Notifications
-Task 12: Validation and Error Handling
-Task 13: UI/UX Improvements and Virtual Fields
-Task 14: CakePHP Configuration
-Task 15: Branding Customization
-Task 16: Code Quality and Best Practices
-
-LE HOANG agrees with the work breakdown agreement. 07/11/2025
-
----
-
-## Database Setup
-
-### Database Credentials
-
-- **Database Name:** `A5`
-- **Database Host:** `localhost`
-- **Username:** [Configure in `config/app_local.php`]
-- **Password:** [Configure in `config/app_local.php`]
-
-The database dump file (`schema_data.sql`) includes:
-- Complete schema for all tables (organisations, volunteers, users, events, volunteer_events, contact_messages, volunteer_signups)
-- Primary keys, foreign keys, and all column constraints
-- Initial admin user with hashed password (see `schema_data.sql`)
-- Sample data for organisations, volunteers, events, and other entities
-
----
-
-## Installation & Configuration
-
-### Prerequisites
-
-- PHP 8.2 or higher
-- MySQL 5.7 or higher
-- Composer
-- Apache/Nginx web server (or PHP built-in server)
-
-### Installation Steps
-
-1. Clone the repository:
 ```bash
-git clone https://github.com/VLucasChen/CommunityLink-App.git
-cd CommunityLink-App
+chmod -R 755 tmp/ logs/ webroot/volunteer_documents/ webroot/img/volunteer_profiles/
 ```
 
-2. Install dependencies:
-```bash
-composer install
-```
+### 5. Run locally
 
-3. Configure database connection:
-   - Edit `config/app_local.php`
-   - Update the `Datasources` section with your database credentials:
-   ```php
-   'Datasources' => [
-       'default' => [
-           'host' => 'localhost',
-           'username' => 'your_username',
-           'password' => 'your_password',
-           'database' => 'A5',
-           // ... other settings
-       ],
-   ],
-   ```
-
-4. Import the database:
-```bash
-mysql -u [username] -p A5 < schema_data.sql
-```
-
-5. Set proper permissions:
-```bash
-chmod -R 755 tmp/
-chmod -R 755 logs/
-chmod -R 755 webroot/volunteer_documents/
-chmod -R 755 webroot/img/volunteer_profiles/
-```
-
-6. Start the development server:
 ```bash
 bin/cake server -p 8765
 ```
 
-7. Visit `http://localhost:8765` in your browser
+Open `http://localhost:8765`.
+
+### Demo admin & volunteers
+
+After the import, sign in using the administrator account defined in `schema_data.sql` (username in the seed data; password stored as a bcrypt hash—set a known password via your DB or app if you need to log in locally). Volunteer **user** accounts are not pre-linked to every volunteer row; create linked users from the admin **Users** area as needed.
 
 ---
 
-## Application Features
+## Project layout
 
-### Public Pages
-- Home page with CommunityLink branding
-- Volunteer registration form (with document upload)
-- Partner Organisation registration form
-- Contact Us page
-
-### Admin Dashboard
-- Top 10 most active volunteers (current year)
-- Top 10 most active partner organisations (current year)
-- Volunteer skills distribution
-- Events in coming month by status
-- Auto-archiving of past events
-
-### Admin Page
-- Events Management - Complete CRUD with all A5 fields
-- Volunteers Management - Complete CRUD including profile page
-- Volunteer Signups Management - List, view, edit, public signup
-- Organisations Management - Complete CRUD with public signup
-- Users Management - Complete CRUD with role management
-- Contact Messages Management - List, view, edit, reply, public contact
-
-### Authentication
-- CakePHP Authentication plugin
-- Role-based access (admin, assistant, volunteer)
-- Hashed passwords
-- Assistant protection (cannot delete admin users)
-
-### Search & Filter
-- Server-side multi-criteria search using QueryBuilder
-- Search across all entities (Events, Volunteers, Organisations, etc.)
-- Combined filters (e.g., skills AND date)
-
-### Entity Management
-- Complete CRUD for all entities
-- Detail views with related records
-- File uploads (profile pictures, documents)
-- Status tracking and automation
-
-### Validation & Error Handling
-- **Phone Number Validation:** Australian format (04XX XXX XXX) enforced on all forms
-  - Contact Messages, Volunteer Signups, Volunteers, Organisations
-  - Accepts formats: `04XX XXX XXX`, `(04)XX XXX XXX`, `04XX-XXX-XXX`
-- **Form Validation:**
-  - Email validation on all email fields
-  - Required field validation
-  - Maximum length validation
-  - Positive number validation for numeric fields (event size, crew count)
-  - Date format validation
-- **Error Display:**
-  - Clear, user-friendly error messages
-  - Field-specific validation errors
-  - No duplicate error messages
-  - Consistent error handling across all forms
+| Area | Path |
+|------|------|
+| App config | `config/app.php`, `config/app_local.php` (local only) |
+| Routes | `config/routes.php` |
+| Controllers | `src/Controller/` |
+| Models / tables | `src/Model/Table/` |
+| Templates | `templates/` |
+| Web / uploads | `webroot/` |
+| Schema + seed | `schema_data.sql` |
 
 ---
 
-## Technology Stack
+## Maintainer
 
-- **Framework:** CakePHP 5.x
-- **Database:** MySQL
-- **Frontend:** Bootstrap 5.1.3
-- **Icons:** Font Awesome 6.0.0
-- **PHP Version:** 8.2+
-
----
-
-## Important Files
-
-- **Database Schema:** `schema_data.sql`
-- **Configuration:** `config/app_local.php`, `config/app.php`
-- **Routes:** `config/routes.php`
-- **Models:** `src/Model/Table/`
-- **Controllers:** `src/Controller/`
-- **Views:** `templates/`
+**Yichen Huang** — [@VLucasChen](https://github.com/VLucasChen)
 
 ---
 
 ## License
 
-Application source in this repository is licensed under the **MIT License**; see [`LICENSE`](LICENSE).
-
-This project was developed for FIT2104 Web Database Applications at Monash University.
+MIT. See [`LICENSE`](LICENSE).

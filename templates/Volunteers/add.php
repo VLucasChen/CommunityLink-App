@@ -1,7 +1,7 @@
 <?php
 /**
  * Add Volunteer page for CommunityLink - A5 CakePHP version
- * Based on Events add template, adapted for Volunteers with all A5 fields
+ * Based on Events add template, adapted for Volunteers.
  * 
  * @var \App\View\AppView $this
  * @var \App\Model\Entity\Volunteer $volunteer
