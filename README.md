@@ -1,15 +1,19 @@
 # CommunityLink - Community Event Management System
 
+Event and volunteer management for not-for-profits — full-stack PHP (CakePHP), MySQL, and Bootstrap.
+
 **Assignment 5 - FIT2104 Web Database Applications**
 
 ## Authors
 
-- **HUANG YICHEN** - Student ID: 35860537 - Submitted Date: 09/11/2025
-- **LE HOANG** - Student ID: 33603294 - Submitted Date: 09/11/2025
+- **HUANG YICHEN** — Submitted 09/11/2025
+- **LE HOANG** — Submitted 09/11/2025
 
 ## Repository
 
-**GitLab Repository URL:** https://git.infotech.monash.edu/fit2104/fit2104-2025-s2/assessment-5
+**GitHub (public mirror):** https://github.com/VLucasChen/CommunityLink-App  
+
+**Monash GitLab (course submission):** https://git.infotech.monash.edu/fit2104/fit2104-2025-s2/assessment-5
 
 ## Database Dump File
 
@@ -31,18 +35,15 @@ Or using MySQL client:
 SOURCE schema_data.sql;
 ```
 
-## Login Credentials
+## Login credentials
 
-### Admin Account
-- **Username:** `AmyTan`
-- **Password:** `AmyTan123`
-- **Role:** `admin`
-- **Email:** `admin@communitylink.com`
+### Admin account
+After importing `schema_data.sql`, a demo administrator account is created (see the seed data for the username; the password is stored as a hash). **Change or replace demo credentials** before any shared or production deployment.
 
-### Volunteer Account
+### Volunteer account
 Volunteer accounts are not pre-created in the database. To create a volunteer account:
 
-1. Log in as admin (AmyTan / AmyTan123)
+1. Log in with an administrator account
 2. Navigate to **Users** → **Add User**
 3. Create a user with role "volunteer"
 4. Link the user to an existing volunteer record (or create a volunteer first via **Volunteers** → **Add Volunteer**)
@@ -51,7 +52,7 @@ Volunteer accounts are not pre-created in the database. To create a volunteer ac
 
 ## Work Breakdown Agreement
 
-**HUANG YICHEN (35860537):**
+**HUANG YICHEN:**
 
 Task 1: Database Schema Design and CakePHP Compliance
 Task 2: Authentication System Implementation
@@ -77,7 +78,7 @@ HUANG YICHEN agrees with the work breakdown agreement. 07/11/2025
 
 ---
 
-**LE HOANG (33603294):** 
+**LE HOANG:** 
 
 Task 1: Users Management
 Task 2: Contact Messages Management
@@ -112,7 +113,7 @@ LE HOANG agrees with the work breakdown agreement. 07/11/2025
 The database dump file (`schema_data.sql`) includes:
 - Complete schema for all tables (organisations, volunteers, users, events, volunteer_events, contact_messages, volunteer_signups)
 - Primary keys, foreign keys, and all column constraints
-- Initial admin user (AmyTan) with hashed password
+- Initial admin user with hashed password (see `schema_data.sql`)
 - Sample data for organisations, volunteers, events, and other entities
 
 ---
@@ -130,8 +131,8 @@ The database dump file (`schema_data.sql`) includes:
 
 1. Clone the repository:
 ```bash
-git clone https://git.infotech.monash.edu/fit2104/fit2104-2025-s2/assessment-5
-cd FIT2104_A5
+git clone https://github.com/VLucasChen/CommunityLink-App.git
+cd CommunityLink-App
 ```
 
 2. Install dependencies:
@@ -146,8 +147,8 @@ composer install
    'Datasources' => [
        'default' => [
            'host' => 'localhost',
-           'username' => 'your_username', (My username is:'root')
-           'password' => 'your_password', (My password is: '')
+           'username' => 'your_username',
+           'password' => 'your_password',
            'database' => 'A5',
            // ... other settings
        ],
@@ -257,4 +258,6 @@ bin/cake server -p 8765
 
 ## License
 
-This project is developed for FIT2104 Web Database Applications at Monash University.
+Application source in this repository is licensed under the **MIT License**; see [`LICENSE`](LICENSE).
+
+This project was developed for FIT2104 Web Database Applications at Monash University.
