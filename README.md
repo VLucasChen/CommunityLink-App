@@ -95,7 +95,7 @@ After the import, sign in using the administrator account defined in `schema_dat
 
 ## Maintainer
 
-**Yichen Huang** — [@VLucasChen](https://github.com/VLucasChen)
+**Lucas Huang** — [@VLucasChen](https://github.com/VLucasChen)
 
 ---
 
