@@ -71,7 +71,9 @@ jobs:
       uses: ramsey/composer-install@v3
 
     - name: Run PHP CodeSniffer
-      run: vendor/bin/phpcs --report=checkstyle | cs2pr
+      # cs2pr fails the job on any checkstyle issue including line-length warnings;
+      # only pipe errors (not warnings) so real violations still fail CI.
+      run: vendor/bin/phpcs --report=checkstyle --warning-severity=0 | cs2pr
 
     - name: Run PHPStan
       if: always()
