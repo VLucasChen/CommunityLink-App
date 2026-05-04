@@ -2,7 +2,7 @@
 
 Web application for **event planning**, **volunteer coordination**, and **partner organisation** workflows for community and not-for-profit teams. Public pages support discovery and sign-up; authenticated staff get dashboards, CRUD, search, and file handling behind role-based access.
 
-**Stack:** PHP 8.2+, CakePHP 5, MySQL, Bootstrap 5, Font Awesome 6.
+**Stack:** PHP 8.3+, CakePHP 5, MySQL, Bootstrap 5, Font Awesome 6.
 
 ---
 
@@ -19,7 +19,7 @@ Web application for **event planning**, **volunteer coordination**, and **partne
 
 ## Requirements
 
-- PHP 8.2+
+- PHP 8.3+
 - MySQL 5.7+ (or compatible)
 - [Composer](https://getcomposer.org/)
 
