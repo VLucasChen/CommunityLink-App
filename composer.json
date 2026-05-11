@@ -6,7 +6,7 @@
     "homepage": "https://github.com/VLucasChen/CommunityLink-App",
     "require": {
         "php": ">=8.3",
-        "cakephp/authentication": "^3.3",
+        "cakephp/authentication": "^4.1",
         "cakephp/cakephp": "5.2.*",
         "cakephp/debug_kit": "5.1",
         "cakephp/migrations": "^4.0.0",
